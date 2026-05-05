@@ -17,9 +17,9 @@ export function getMonthlyStats(invoices: Invoice[]) {
   let lastInvoices = 0;
 
   for (const invoice of invoices) {
-    if (invoice.isDeletedAt) continue;
+    if (invoice.isDeleted) continue;
 
-    const createdDate = new Date(invoice.createdAt);
+    const createdDate = new Date(invoice.createdAt!);
 
     const month = createdDate.getMonth();
     const year = createdDate.getFullYear();
