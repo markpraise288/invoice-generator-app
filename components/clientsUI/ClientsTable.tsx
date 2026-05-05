@@ -32,7 +32,7 @@ export default function ClientsTable({
         {/* Body */}
         <tbody className="divide-y divide-gray-100 dark:divide-gray-700 text-gray-900 dark:text-gray-100">
           {clients
-            .filter((client) => !client.isDeletedAt)
+            .filter((client) => !client.isDeleted)
             .map((client) => (
               <tr key={client._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                 <td className="p-3 font-medium">{client.name}</td>

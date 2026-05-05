@@ -188,12 +188,12 @@ export default function ClientProfilePage() {
           <p className="text-gray-500 dark:text-gray-300 text-sm">Status</p>
           <span
             className={`px-2 py-1 rounded text-xs font-semibold ${
-              client.isDeletedAt
+              client.isDeleted
                 ? "bg-red-100 text-red-700"
                 : "bg-green-100 text-green-700"
             }`}
           >
-            {client.isDeletedAt ? "Deleted" : "Active"}
+            {client.isDeleted ? "Deleted" : "Active"}
           </span>
         </div>
 

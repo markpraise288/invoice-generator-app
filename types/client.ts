@@ -9,5 +9,5 @@ export interface Client {
   createdAt?: string;
   updatedAt?: string;
 
-  isDeletedAt?: boolean;
+  isDeleted?: boolean;
 }

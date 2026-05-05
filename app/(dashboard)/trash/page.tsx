@@ -24,7 +24,7 @@ export default function TrashPage() {
       const expensesRes = await apiFetch("/expenses");
 
       setClients(
-        clientsRes.data.filter((c: Client) => c.isDeletedAt)
+        clientsRes.data.filter((c: Client) => c.isDeleted)
       );
 
       setInvoices(

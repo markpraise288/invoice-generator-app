@@ -6,7 +6,7 @@ export function computeDashboardStats(invoices: Invoice[]) {
   let totalRevenue = 0;
 
   for (const invoice of invoices) {
-    if (invoice.isDeletedAt) continue;
+    if (invoice.isDeleted) continue;
 
     totalInvoices++;
 
