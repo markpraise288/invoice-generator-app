@@ -9,7 +9,7 @@ export const getOutstandingInvoices = (invoices: Invoice[]) => {
       );
 
       return (
-        !inv.isDeletedAt &&
+        !inv.isDeleted &&
         inv.status !== "paid" &&
         paidAmount < inv.total!
       );
