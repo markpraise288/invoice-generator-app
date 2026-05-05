@@ -28,23 +28,30 @@ export default function RevenueChart({ data }: Props) {
   // Filter data
   const filteredData = range === "6m" ? data.slice(-6) : data;
 
-  // Total revenue (paid only)
-  const totalPaid = filteredData.reduce(
-    (sum, item) => sum + item.paid,
-    0
-  );
+  // Totals
+  const totalPaid = filteredData.reduce((sum, item) => sum + item.paid, 0);
+  const totalUnpaid = filteredData.reduce((sum, item) => sum + item.unpaid, 0);
 
-  const totalUnpaid = filteredData.reduce(
-    (sum, item) => sum + item.unpaid,
-    0
-  );
+  // Safe formatter (FIXED)
+  const formatCurrency = (value: unknown) => {
+    if (typeof value === "number") {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(value);
+    }
+    return "";
+  };
 
-    return (
+  return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow dark:shadow-none border border-gray-100 dark:border-gray-700 h-full">
+      
       {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Revenue Overview</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Revenue Overview
+          </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Track your earnings and pending payments
           </p>
@@ -118,28 +125,20 @@ export default function RevenueChart({ data }: Props) {
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
 
             <XAxis dataKey="month" stroke="#9ca3af" />
-
             <YAxis stroke="#9ca3af" />
 
+            {/* FIXED TOOLTIP */}
             <Tooltip
               contentStyle={{
                 backgroundColor: "#1f2937",
                 borderColor: "#374151",
                 color: "#f9fafb",
               }}
-              formatter={(value: number | undefined) =>
-                value
-                  ? new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(value)
-                  : ""
-              }
+              formatter={formatCurrency}
             />
 
             <Legend />
 
-            {/* PAID */}
             <Area
               type="monotone"
               dataKey="paid"
@@ -148,7 +147,6 @@ export default function RevenueChart({ data }: Props) {
               strokeWidth={2}
             />
 
-            {/* UNPAID */}
             <Area
               type="monotone"
               dataKey="unpaid"

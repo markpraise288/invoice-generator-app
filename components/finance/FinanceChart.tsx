@@ -10,7 +10,6 @@ import {
   ResponsiveContainer,
   CartesianGrid,
   Legend,
-  Cell,
 } from "recharts";
 import { MonthlyFinanceData } from "@/types/finance";
 
@@ -27,17 +26,23 @@ export default function FinanceChart({ data }: FinanceChartProps) {
   const totalExpenses = filteredData.reduce((sum, item) => sum + item.expenses, 0);
   const totalProfit = filteredData.reduce((sum, item) => sum + item.profit, 0);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      notation: "compact",
-      maximumFractionDigits: 1,
-    }).format(value);
+  // Safe formatter (FIXED)
+  const formatCurrency = (value: unknown) => {
+    if (typeof value === "number") {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        notation: "compact",
+        maximumFractionDigits: 1,
+      }).format(value);
+    }
+    return "";
   };
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+      
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -59,6 +64,7 @@ export default function FinanceChart({ data }: FinanceChartProps) {
           >
             6M
           </button>
+
           <button
             onClick={() => setRange("12m")}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -72,6 +78,7 @@ export default function FinanceChart({ data }: FinanceChartProps) {
         </div>
       </div>
 
+      {/* STATS */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Revenue</p>
@@ -79,20 +86,29 @@ export default function FinanceChart({ data }: FinanceChartProps) {
             {formatCurrency(totalRevenue)}
           </p>
         </div>
+
         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Expenses</p>
           <p className="text-xl font-bold text-red-600 dark:text-red-400">
             {formatCurrency(totalExpenses)}
           </p>
         </div>
+
         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Net Profit</p>
-          <p className={`text-xl font-bold ${totalProfit >= 0 ? "text-blue-600 dark:text-blue-400" : "text-red-600 dark:text-red-400"}`}>
+          <p
+            className={`text-xl font-bold ${
+              totalProfit >= 0
+                ? "text-blue-600 dark:text-blue-400"
+                : "text-red-600 dark:text-red-400"
+            }`}
+          >
             {formatCurrency(totalProfit)}
           </p>
         </div>
       </div>
 
+      {/* CHART */}
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -100,18 +116,22 @@ export default function FinanceChart({ data }: FinanceChartProps) {
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+
             <XAxis
               dataKey="month"
               stroke="#9ca3af"
               fontSize={12}
               tickLine={false}
             />
+
             <YAxis
               stroke="#9ca3af"
               fontSize={12}
               tickLine={false}
               tickFormatter={formatCurrency}
             />
+
+            {/* FIXED TOOLTIP */}
             <Tooltip
               contentStyle={{
                 backgroundColor: "#1f2937",
@@ -119,20 +139,18 @@ export default function FinanceChart({ data }: FinanceChartProps) {
                 borderRadius: "8px",
                 color: "#f9fafb",
               }}
-              formatter={(value: number) => [
-                new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }).format(value),
-              ]}
+              formatter={formatCurrency}
             />
+
             <Legend />
+
             <Bar
               dataKey="revenue"
               name="Revenue"
               fill="#16a34a"
               radius={[4, 4, 0, 0]}
             />
+
             <Bar
               dataKey="expenses"
               name="Expenses"
