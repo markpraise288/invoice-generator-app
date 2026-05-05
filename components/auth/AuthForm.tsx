@@ -12,6 +12,7 @@ import {
   Phone,
   Eye,
   EyeOff,
+  LocationEdit,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -71,7 +72,6 @@ export default function AuthForm({ title, submitRequest }: AuthFormProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative bg-gray-50 dark:bg-gray-950 overflow-hidden">
-      
       {/* BACKGROUND GLOW */}
       <div className="absolute -top-25 left-1/2 -translate-x-1/2 w-150 h-150 bg-blue-600/10 blur-[120px] rounded-full" />
 
@@ -91,9 +91,7 @@ export default function AuthForm({ title, submitRequest }: AuthFormProps) {
             </div>
           </div>
 
-          <h1 className="text-xl font-semibold dark:text-white">
-            InvoiceFlow
-          </h1>
+          <h1 className="text-xl font-semibold dark:text-white">InvoiceFlow</h1>
 
           <h2 className="text-2xl font-bold dark:text-white">
             {title === "Login" ? "Welcome Back" : "Create Account"}
@@ -103,9 +101,34 @@ export default function AuthForm({ title, submitRequest }: AuthFormProps) {
         {/* SIGNUP FIELDS */}
         {title === "Signup" && (
           <div className="space-y-4">
-            <Input icon={User} name="name" placeholder="Full Name" value={formData.name || ""} onChange={handleChange} />
-            <Input icon={Building} name="companyName" placeholder="Company Name" value={formData.companyName || ""} onChange={handleChange} />
-            <Input icon={Phone} name="phone" placeholder="Phone" value={formData.phone || ""} onChange={handleChange} />
+            <Input
+              icon={User}
+              name="name"
+              placeholder="Full Name"
+              value={formData.name || ""}
+              onChange={handleChange}
+            />
+            <Input
+              icon={Building}
+              name="companyName"
+              placeholder="Company Name"
+              value={formData.companyName || ""}
+              onChange={handleChange}
+            />
+            <Input
+              icon={Phone}
+              name="phone"
+              placeholder="Phone"
+              value={formData.phone || ""}
+              onChange={handleChange}
+            />
+            <Input
+              icon={LocationEdit}
+              name="address"
+              placeholder="Address"
+              value={formData.address || ""}
+              onChange={handleChange}
+            />
           </div>
         )}
 
@@ -146,8 +169,8 @@ export default function AuthForm({ title, submitRequest }: AuthFormProps) {
                   passwordStrength === "weak"
                     ? "text-red-500"
                     : passwordStrength === "medium"
-                    ? "text-yellow-500"
-                    : "text-green-500"
+                      ? "text-yellow-500"
+                      : "text-green-500"
                 }`}
               >
                 {passwordStrength} password
@@ -166,14 +189,19 @@ export default function AuthForm({ title, submitRequest }: AuthFormProps) {
 
         {/* FORGOT PASSWORD */}
         {title === "Login" && (
-          <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-blue-600 hover:underline"
+          >
             Forgot your password?
           </Link>
         )}
 
         {/* SWITCH */}
         <p className="text-center text-sm text-gray-500">
-          {title === "Login" ? "Don't have an account?" : "Already have an account?"}{" "}
+          {title === "Login"
+            ? "Don't have an account?"
+            : "Already have an account?"}{" "}
           <span
             onClick={() =>
               router.push(title === "Login" ? "/signup" : "/login")
