@@ -52,9 +52,9 @@ export default function ClientsPage() {
     }
 
     if (statusFilter === "active") {
-      data = data.filter((c) => !c.isDeletedAt);
+      data = data.filter((c) => !c.isDeleted);
     } else if (statusFilter === "deleted") {
-      data = data.filter((c) => !!c.isDeletedAt);
+      data = data.filter((c) => !!c.isDeleted);
     }
 
     if (sort === "asc") {
