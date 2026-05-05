@@ -250,7 +250,7 @@ export default function CreateInvoicePage() {
       const send = confirm("Send invoice immediately?");
 
       const res = await fetch(
-        `http://localhost:5000/api/invoices?send=${send}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/invoices?send=${send}`,
         {
           method: "POST",
           credentials: "include",
