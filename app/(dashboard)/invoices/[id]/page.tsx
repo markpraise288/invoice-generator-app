@@ -1,153 +1,76 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import InvoiceRenderer from "@/components/invoicesUI/InvoiceRenderer";
 import { ArrowBigLeft } from "lucide-react";
 import Link from "next/link";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { Invoice } from "@/types/invoice";
 
-interface PageProps {
-  params: Promise<{
-    id: string;
-  }>;
+interface User {
+  companyName: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
 }
 
-import { cookies } from "next/headers";
+export default function InvoicePage({ params }: { params: { id: string } }) {
+  const { id } = params;
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-async function getCookieHeader() {
-  const cookieStore = await cookies();
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const invoiceRes = await fetchWithAuth(`/invoices/${id}`);
+        const userRes = await fetchWithAuth(`/users`);
 
-  return cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
-}
+        setInvoice(invoiceRes.data);
+        setUser(userRes.data);
+      } catch (err: any) {
+        console.error(err);
 
-async function refreshAccessToken(cookieHeader: string) {
-  const res = await fetch(`${API_BASE}/auth/accessToken`, {
-    method: "GET",
-    headers: {
-      Cookie: cookieHeader,
-    },
-  });
-
-  if (!res.ok) {
-    alert("Session expired. Please login again.");
-    window.location.href = "/login";
-    return false;
-  }
-
-  return res.ok;
-}
-
-async function getInvoice(id: string) {
-  try {
-    let cookieHeader = await getCookieHeader();
-
-    // 🔹 First attempt
-    let res = await fetch(`${API_BASE}/invoices/${id}`, {
-      headers: {
-        Cookie: cookieHeader,
-      },
-      cache: "no-store",
-    });
-
-    // 🔴 If access token expired
-    if (res.status === 401) {
-      console.warn("Access token expired. Refreshing...");
-
-      const refreshed = await refreshAccessToken(cookieHeader);
-
-      if (!refreshed) {
-        throw new Error("Session expired. Please login again.");
+        if (err.message === "Session expired") {
+          window.location.href = "/login";
+        } else {
+          setError("Failed to load data");
+        }
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // 🔹 IMPORTANT: get updated cookies again
-      cookieHeader = await getCookieHeader();
+    loadData();
+  }, [id]);
 
-      // 🔁 Retry request
-      res = await fetch(`${API_BASE}/invoices/${id}`, {
-        headers: {
-          Cookie: cookieHeader,
-        },
-        cache: "no-store",
-      });
-    }
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch invoice");
-    }
-
-    const data = await res.json();
-    return data.data;
-
-  } catch (err) {
-    console.error(err);
-    throw err;
+  if (loading) {
+    return <div className="p-6">Loading...</div>;
   }
-}
 
-async function getUser() {
-  try {
-    let cookieHeader = await getCookieHeader();
-
-    // 🔹 First attempt
-    let res = await fetch(`${API_BASE}/users`, {
-      headers: {
-        Cookie: cookieHeader,
-      },
-      cache: "no-store",
-    });
-
-    // 🔴 If access token expired
-    if (res.status === 401) {
-      console.warn("Access token expired. Refreshing...");
-
-      const refreshed = await refreshAccessToken(cookieHeader);
-
-      if (!refreshed) {
-        throw new Error("Session expired. Please login again.");
-      }
-
-      // 🔹 IMPORTANT: get updated cookies again
-      cookieHeader = await getCookieHeader();
-
-      // 🔁 Retry request
-      res = await fetch(`${API_BASE}/users`, {
-        headers: {
-          Cookie: cookieHeader,
-        },
-        cache: "no-store",
-      });
-    }
-
-    if (!res.ok) {
-      throw new Error("Failed to fetch invoice");
-    }
-
-    const data = await res.json();
-    return data.data;
-
-  } catch (err) {
-    console.error(err);
-    throw err;
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
   }
-}
 
-export default async function InvoicePage({ params }: PageProps) {
-  const { id } = await params;
-  const invoiceData = await getInvoice(id);
-  const userData = await getUser();
-
-  const invoice = invoiceData;
-  const user = userData;
+  if (!invoice || !user) {
+    return <div className="p-6">No data found</div>;
+  }
 
   return (
     <div className="p-6 h-full bg-blue-50 rounded dark:bg-gray-900">
-      <Link href="/invoices" className="flex items-center gap-1 text-gray-600 dark:text-gray-300 mb-4 hover:underline">
+      <Link
+        href="/invoices"
+        className="flex items-center gap-1 text-gray-600 dark:text-gray-300 mb-4 hover:underline"
+      >
         <ArrowBigLeft /> Back
       </Link>
-    <div className="p-6 overflow-y-scroll h-full bg-blue-50 rounded dark:bg-gray-900">
-      <InvoiceRenderer invoice={invoice} user={user} />
-    </div>
+
+      <div className="p-6 overflow-y-scroll h-full bg-blue-50 rounded dark:bg-gray-900">
+        <InvoiceRenderer invoice={invoice} user={user} />
+      </div>
     </div>
   );
 }
