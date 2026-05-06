@@ -6,6 +6,7 @@ import { ArrowBigLeft } from "lucide-react";
 import Link from "next/link";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { Invoice } from "@/types/invoice";
+import { useParams } from "next/navigation";
 
 interface User {
   companyName: string;
@@ -15,8 +16,9 @@ interface User {
   address: string;
 }
 
-export default function InvoicePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function InvoicePage() {
+  const params = useParams();
+  const id = params?.id as string;
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [user, setUser] = useState<User | null>(null);
