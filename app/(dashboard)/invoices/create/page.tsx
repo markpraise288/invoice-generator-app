@@ -244,38 +244,64 @@ export default function CreateInvoicePage() {
 
   // ===== CREATE =====
   const handleCreate = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const send = confirm("Send invoice immediately?");
+    const send = confirm("Send invoice immediately?");
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/invoices?send=${send}`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...invoice,
-            total: totals.total,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        alert("Failed to create invoice");
-        return;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/invoices?send=${send}`,
+      {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...invoice,
+          total: totals.total,
+        }),
       }
+    );
 
-      router.push("/invoices");
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong");
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      alert("Failed to create invoice");
+      return;
     }
-  };
 
+    // 🔥 IMPORTANT: handle PDF response
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    // 🔥 Extract filename from header (optional but clean)
+    const contentDisposition = res.headers.get("Content-Disposition");
+    let fileName = "invoice.pdf";
+
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename="(.+)"/);
+      if (match) fileName = match[1];
+    }
+
+    // 🔥 Trigger download
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+
+    // ✅ AFTER download → redirect
+    setTimeout(() => {
+      router.push("/invoices");
+    }, 500);
+
+  } catch (err) {
+    console.error(err);
+    alert("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="flex gap-6 p-6 w-full bg-gray-50 dark:bg-slate-900">
 
