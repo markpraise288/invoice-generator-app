@@ -29,6 +29,12 @@ async function refreshAccessToken(cookieHeader: string) {
     },
   });
 
+  if (!res.ok) {
+    alert("Session expired. Please login again.");
+    window.location.href = "/login";
+    return false;
+  }
+
   return res.ok;
 }
 
