@@ -15,6 +15,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 import GlobalSearch from "@/components/ui/GlobalSearch";
+import { apiFetch } from "@/lib/apiFetch";
+import toast from "react-hot-toast";
 
 interface Notification {
   id: string;
@@ -34,6 +36,19 @@ export default function TopNavbar() {
     Array.isArray(notifications) &&
     notifications.some((n) => !n.isRead);
 
+  const logout = () => {
+  // Implement logout logic here
+  try{
+    apiFetch("/auth/logout", { method: "POST" }).then(() => {
+      toast.success("Logged out successfully!");
+      router.push("/");
+    });
+  }
+  catch(err){
+    console.error(err);
+    toast.error("Logout failed. Please try again.");
+  }
+};
   return (
     <div className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/60 dark:border-gray-700/60 px-4 md:px-6 py-3 flex items-center justify-between gap-4">
 
@@ -76,7 +91,7 @@ export default function TopNavbar() {
             <DropdownMenuItem onClick={() => router.push("/account")}>
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-red-500">
+            <DropdownMenuItem className="text-red-500" onClick={logout}>
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
