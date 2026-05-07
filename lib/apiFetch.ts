@@ -12,7 +12,10 @@ async function refreshAccessToken() {
 
       refreshPromise = null;
 
-      if (!res.ok) return false;
+      if (res.status === 401) {
+        window.location.href = "/login";
+        return false;
+      };
       return true;
     })();
   }

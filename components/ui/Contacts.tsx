@@ -45,8 +45,8 @@ export default function Contact() {
 
           {/* CONTACT INFO */}
           <div className="space-y-4">
-            <ContactItem icon={Mail} text="support@invoiceflow.com" />
-            <ContactItem icon={Phone} text="+265 999 123 456" />
+            <ContactItem icon={Mail} text="invoiceflow288@gmail.com" />
+            <ContactItem icon={Phone} text="+265 896 831 165" />
             <ContactItem icon={MapPin} text="Blantyre, Malawi" />
           </div>
         </motion.div>

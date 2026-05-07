@@ -40,10 +40,10 @@ export default function CTA() {
           </Link>
 
           <Link
-            href="#pricing"
+            href="#contact"
             className="px-8 py-3 border border-white rounded-xl hover:bg-white/10 transition"
           >
-            View Pricing
+            Contact Us
           </Link>
         </motion.div>
       </div>
