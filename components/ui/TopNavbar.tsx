@@ -76,9 +76,6 @@ export default function TopNavbar() {
             <DropdownMenuItem onClick={() => router.push("/account")}>
               Profile
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/settings")}>
-              Settings
-            </DropdownMenuItem>
             <DropdownMenuItem className="text-red-500">
               Logout
             </DropdownMenuItem>
