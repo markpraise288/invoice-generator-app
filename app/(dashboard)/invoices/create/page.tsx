@@ -329,7 +329,6 @@ export default function CreateInvoicePage() {
             }
             className="w-full p-2 border rounded"
           >
-            <option value="standard">Standard</option>
             <option value="subscription">Subscription</option>
             <option value="service">Service</option>
           </select>
