@@ -147,7 +147,7 @@ export default function StandardFields({
         <input
           type="number"
           placeholder="Discount %"
-          value={invoice.discount.value}
+          value={invoice.discount.value || ""}
           onChange={(e) => handleDiscount(e.target.value)}
           className="input"
         />
@@ -155,9 +155,10 @@ export default function StandardFields({
         <input
           type="number"
           placeholder="Tax %"
-          value={invoice.tax.value}
+          value={invoice.tax.value || ""}
           onChange={(e) => handleTax(e.target.value)}
           className="input"
+          aria-controls="none"
         />
       </div>
     </div>
