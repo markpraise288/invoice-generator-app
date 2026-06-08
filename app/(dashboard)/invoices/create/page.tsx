@@ -327,7 +327,7 @@ export default function CreateInvoicePage() {
                 prev ? { ...prev, type: e.target.value as any } : prev
               )
             }
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="subscription">Subscription</option>
             <option value="service">Service</option>
