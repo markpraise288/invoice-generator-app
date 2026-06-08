@@ -66,21 +66,21 @@ export default function StandardFields({
           value={invoice.clientSnapshot.email}
           onChange={handleClientChange}
           placeholder="Email"
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
         <input
           name="phone"
           value={invoice.clientSnapshot.phone}
           onChange={handleClientChange}
           placeholder="Phone"
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
         <input
           name="address"
           value={invoice.clientSnapshot.address}
           onChange={handleClientChange}
           placeholder="Address"
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
       </div>
 
