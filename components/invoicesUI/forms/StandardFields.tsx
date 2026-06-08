@@ -31,7 +31,7 @@ export default function StandardFields({
   handleTax,
 }: StandardFieldsProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mb-6">
 
       {/* 🔹 CLIENT SELECT */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm">
