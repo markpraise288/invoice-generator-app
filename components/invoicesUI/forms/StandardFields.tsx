@@ -59,28 +59,28 @@ export default function StandardFields({
           value={invoice.clientSnapshot.name}
           onChange={handleClientChange}
           placeholder="Client Name"
-          className="input"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           name="email"
           value={invoice.clientSnapshot.email}
           onChange={handleClientChange}
           placeholder="Email"
-          className="input"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           name="phone"
           value={invoice.clientSnapshot.phone}
           onChange={handleClientChange}
           placeholder="Phone"
-          className="input"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <input
           name="address"
           value={invoice.clientSnapshot.address}
           onChange={handleClientChange}
           placeholder="Address"
-          className="input"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
@@ -96,7 +96,7 @@ export default function StandardFields({
             >
               <input
                 placeholder="Description"
-                className="col-span-5 input"
+                className="col-span-5 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={item.description}
                 onChange={(e) =>
                   handleItemChange(i, "description", e.target.value)
@@ -106,7 +106,7 @@ export default function StandardFields({
               <input
                 type="number"
                 placeholder="Qty"
-                className="col-span-2 input"
+                className="col-span-2 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={item.quantity}
                 onChange={(e) =>
                   handleItemChange(i, "quantity", Number(e.target.value))
@@ -116,7 +116,7 @@ export default function StandardFields({
               <input
                 type="number"
                 placeholder="Price"
-                className="col-span-3 input"
+                className="col-span-3 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={item.price}
                 onChange={(e) =>
                   handleItemChange(i, "price", Number(e.target.value))
@@ -149,7 +149,7 @@ export default function StandardFields({
           placeholder="Discount %"
           value={invoice.discount.value || ""}
           onChange={(e) => handleDiscount(e.target.value)}
-          className="input"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
         <input
@@ -157,7 +157,7 @@ export default function StandardFields({
           placeholder="Tax %"
           value={invoice.tax.value || ""}
           onChange={(e) => handleTax(e.target.value)}
-          className="input"
+          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           aria-controls="none"
         />
       </div>
