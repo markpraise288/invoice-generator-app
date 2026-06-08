@@ -52,7 +52,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/markpraise288/invoice-generator-app/issues"
   },
