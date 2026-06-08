@@ -34,7 +34,6 @@ export default function LoginPage() {
 
       console.log("Logged in successfully");
 
-      // No need to store access token manually if using cookies
       // Backend should set HTTP-only cookies
 
       router.push("/dashboard");

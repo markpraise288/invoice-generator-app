@@ -6,7 +6,6 @@ import {
   Plus, 
   Download, 
   Calendar,
-  Filter,
   ArrowUpDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import ExpenseTable from "@/components/finance/ExpenseTable";
 import ExpenseForm from "@/components/finance/ExpenseForm";
 import SummaryCard from "@/components/finance/SummaryCard";
 import { useExpenses } from "@/hooks/useFinance";
-import { Expense, ExpenseCategory } from "@/types/finance";
+import { Expense } from "@/types/finance";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ExpensesPage() {

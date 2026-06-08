@@ -347,7 +347,6 @@ export default function CreateInvoicePage() {
 
         {/* FORM */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow">
-          {invoice.type === "standard" && (
             <StandardFields
               invoice={invoice}
               clients={clients}
@@ -359,7 +358,6 @@ export default function CreateInvoicePage() {
               handleDiscount={handleDiscount}
               handleTax={handleTax}
             />
-          )}
 
           {invoice.type === "subscription" && (
             <SubscriptionFields invoice={invoice} setInvoice={setInvoice as any} />
