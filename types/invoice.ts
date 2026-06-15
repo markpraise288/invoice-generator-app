@@ -52,7 +52,7 @@ export type InvoiceTemplate =
   | "corporateWave"
   | "bold"
   | "elegant"
-  | "boldpro"
+  | "bold-pro"
   | "compact";
 
 export interface Invoice {
