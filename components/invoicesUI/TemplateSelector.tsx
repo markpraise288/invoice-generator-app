@@ -48,7 +48,7 @@ const templates: { id: Invoice["template"]; pro: boolean }[] = [
   { id: "classic", pro: false },
   { id: "corporateWave", pro: true },
   { id: "bold", pro: true },
-  { id: "boldpro", pro: true },
+  { id: "bold-pro", pro: true },
   { id: "elegant", pro: true },
   { id: "compact", pro: true },
 ];
