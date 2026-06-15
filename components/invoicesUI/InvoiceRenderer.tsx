@@ -26,7 +26,7 @@ const TEMPLATE_MAP = {
   minimal: Minimal,
   elegant: Elegant,
   compact: Compact,
-  boldpro: BoldPro,
+  "bold-pro": BoldPro,
 };
 
 export default function InvoiceRenderer({ invoice, user }: Props) {
