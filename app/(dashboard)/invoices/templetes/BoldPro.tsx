@@ -47,7 +47,7 @@ const BoldCorporateTemplate: React.FC<Props> = ({ invoice, user }) => {
     <div className="max-w-4xl text-gray-800 mx-auto bg-white rounded-2xl shadow-xl overflow-hidden print:shadow-none">
 
       {/* 🔥 HEADER */}
-      <div className="bg-linear-to-r from-slate-900 to-slate-700 text-white px-10 py-8 flex justify-between items-center">
+      <div className="bg-black text-white px-10 py-8 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-wide">INVOICE</h1>
           <p className="text-sm opacity-80 mt-1">
@@ -141,7 +141,7 @@ const BoldCorporateTemplate: React.FC<Props> = ({ invoice, user }) => {
             Notes
           </h3>
           <p className="text-sm text-gray-500">
-            {invoice.terms || "Thank you for your business!"}
+            {invoice.notes || "Thank you for your business!"}
           </p>
         </div>
 
@@ -217,12 +217,6 @@ const BoldCorporateTemplate: React.FC<Props> = ({ invoice, user }) => {
           </p>
         </div>
       </div>
-      {/* NOTES */}
-      {invoice.notes && (
-        <div className="border-t pt-6 text-sm text-gray-500 m-10">
-          {invoice.notes}
-        </div>
-      )}
     </div>
   );
 };

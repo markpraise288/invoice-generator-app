@@ -85,63 +85,53 @@ export default function StandardFields({
       </div>
 
       {/* 🔹 ITEMS */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm">
-        <h3 className="font-semibold mb-3">Items</h3>
+      {(invoice.template !== "bold" && invoice.template !== "minimal") && (
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm">
+          <h3 className="font-semibold mb-3">Items</h3>
 
-        <div className="space-y-4">
-          {invoice.items.map((item: InvoiceItem, i: number) => (
-            <div
-              key={i}
-              className="grid grid-cols-12 gap-2 items-center"
-            >
-              <input
-                placeholder="Description"
-                className="col-span-5 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                value={item.description}
-                onChange={(e) =>
-                  handleItemChange(i, "description", e.target.value)
-                }
-              />
+          <div className="space-y-4">
+            {invoice.items.map((item: InvoiceItem, i: number) => (
+              <div key={i} className="grid grid-cols-12 gap-2 items-center">
+                <input
+                  placeholder="Description"
+                  className="col-span-5 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  value={item.description}
+                  onChange={(e) => handleItemChange(i, "description", e.target.value)}
+                />
 
-              <input
-                type="number"
-                placeholder="Qty"
-                className="col-span-2 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                value={item.quantity}
-                onChange={(e) =>
-                  handleItemChange(i, "quantity", Number(e.target.value))
-                }
-              />
+                <input
+                  type="number"
+                  placeholder="Qty"
+                  className="col-span-2 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  value={item.quantity}
+                  onChange={(e) => handleItemChange(i, "quantity", Number(e.target.value))}
+                />
 
-              <input
-                type="number"
-                placeholder="Price"
-                className="col-span-3 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                value={item.price}
-                onChange={(e) =>
-                  handleItemChange(i, "price", Number(e.target.value))
-                }
-              />
+                <input
+                  type="number"
+                  placeholder="Price"
+                  className="col-span-3 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  value={item.price}
+                  onChange={(e) => handleItemChange(i, "price", Number(e.target.value))}
+                />
 
-              <button
-                onClick={() => removeItem(i)}
-                className="col-span-2 flex justify-center items-center text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg p-2 transition"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))}
+                <button
+                  onClick={() => removeItem(i)}
+                  className="col-span-2 flex justify-center items-center text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg p-2 transition"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <button onClick={addItem} className="mt-4 flex items-center gap-2 text-blue-600 hover:text-blue-700">
+            <Plus size={16} />
+            Add Item
+          </button>
         </div>
-
-        <button
-          onClick={addItem}
-          className="mt-4 flex items-center gap-2 text-blue-600 hover:text-blue-700"
-        >
-          <Plus size={16} />
-          Add Item
-        </button>
-      </div>
-
+      )}
+      
       {/* 🔹 FINANCIAL */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm grid grid-cols-2 gap-4">
         <input

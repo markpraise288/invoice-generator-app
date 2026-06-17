@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/apiFetch";
 import { Client, InvoiceItem, User, Invoice } from "@/types";
-
+import { formatDate } from "@/utils/formatDate";
+import { formatCurrency } from "@/utils/formatCurrency";
+import { currencies } from "@/utils/currencies";
 import InvoiceRenderer from "@/components/invoicesUI/InvoiceRenderer";
 import TemplateSelector from "@/components/invoicesUI/TemplateSelector";
 
@@ -12,14 +14,6 @@ import StandardFields from "@/components/invoicesUI/forms/StandardFields";
 import SubscriptionFields from "@/components/invoicesUI/forms/SubscriptionFields";
 import ServiceFields from "@/components/invoicesUI/forms/ServiceFields";
 import PaymentAndNotesFields from "@/components/invoicesUI/forms/PaymentAndNotesFields";
-
-// ✅ Currency Formatter
-const formatCurrency = (amount: number, currency: "USD" | "MWK") => {
-  return new Intl.NumberFormat(currency === "USD" ? "en-US" : "en-MW", {
-    style: "currency",
-    currency,
-  }).format(amount);
-};
 
 export default function CreateInvoicePage() {
   const router = useRouter();
@@ -52,8 +46,8 @@ export default function CreateInvoicePage() {
 
       invoiceNumber: `INV-${Date.now()}`, // 🔥 simple smart ID
 
-      issueDate: today.toISOString(),
-      dueDate: due.toISOString(),
+      issueDate: formatDate(today),
+      dueDate: formatDate(due),
 
       clientSnapshot: {
         name: "",
@@ -66,8 +60,8 @@ export default function CreateInvoicePage() {
 
       shipping: {
         cost: 0,
-        method: '',
-        address: ''
+        method: "",
+        address: "",
       },
 
       discount: { type: "percentage", value: 0 },
@@ -79,13 +73,13 @@ export default function CreateInvoicePage() {
       serviceDetails: {
         totalHours: 0,
         hourlyRate: 0,
-        projectName: ''
+        projectName: "",
       },
 
       subscriptionDetails: {
         planName: "",
         billingCycle: "monthly",
-        startDate: today.toISOString(),
+        startDate: formatDate(today),
       },
     });
 
@@ -127,7 +121,7 @@ export default function CreateInvoicePage() {
               address: selected.address,
             },
           }
-        : prev
+        : prev,
     );
   };
 
@@ -143,7 +137,7 @@ export default function CreateInvoicePage() {
               [name]: value,
             },
           }
-        : prev
+        : prev,
     );
   };
 
@@ -151,17 +145,17 @@ export default function CreateInvoicePage() {
   const handleItemChange = <K extends keyof InvoiceItem>(
     index: number,
     field: K,
-    value: InvoiceItem[K]
+    value: InvoiceItem[K],
   ) => {
     setInvoice((prev) =>
       prev
         ? {
             ...prev,
             items: prev.items.map((item, i) =>
-              i === index ? { ...item, [field]: value } : item
+              i === index ? { ...item, [field]: value } : item,
             ),
           }
-        : prev
+        : prev,
     );
   };
 
@@ -172,7 +166,7 @@ export default function CreateInvoicePage() {
             ...prev,
             items: [...prev.items, { description: "", quantity: 1, price: 0 }],
           }
-        : prev
+        : prev,
     );
   };
 
@@ -183,7 +177,7 @@ export default function CreateInvoicePage() {
             ...prev,
             items: prev.items.filter((_, i) => i !== index),
           }
-        : prev
+        : prev,
     );
   };
 
@@ -195,7 +189,7 @@ export default function CreateInvoicePage() {
             ...prev,
             discount: { type: "percentage", value: Number(value) },
           }
-        : prev
+        : prev,
     );
   };
 
@@ -206,17 +200,18 @@ export default function CreateInvoicePage() {
             ...prev,
             tax: { type: "percentage", value: Number(value) },
           }
-        : prev
+        : prev,
     );
   };
 
   // ===== TOTALS =====
   const totals = useMemo(() => {
-    if (!invoice) return { subtotal: 0, discount: 0, tax: 0, shipping: 0, total: 0 };
+    if (!invoice)
+      return { subtotal: 0, discount: 0, tax: 0, shipping: 0, total: 0 };
 
     const subtotal = invoice.items.reduce(
       (acc, item) => acc + item.quantity * item.price,
-      0
+      0,
     );
 
     const discount =
@@ -244,70 +239,67 @@ export default function CreateInvoicePage() {
 
   // ===== CREATE =====
   const handleCreate = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const send = confirm("Send invoice immediately?");
+      const send = confirm("Send invoice immediately?");
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/invoices?send=${send}`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...invoice,
-          total: totals.total,
-        }),
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/invoices?send=${send}`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...invoice,
+            total: totals.total,
+          }),
+        },
+      );
+
+      if (!res.ok) {
+        alert("Failed to create invoice");
+        return;
       }
-    );
 
-    if (!res.ok) {
-      alert("Failed to create invoice");
-      return;
+      // 🔥 IMPORTANT: handle PDF response
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // 🔥 Extract filename from header (optional but clean)
+      const contentDisposition = res.headers.get("Content-Disposition");
+      let fileName = "invoice.pdf";
+
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match) fileName = match[1];
+      }
+
+      // 🔥 Trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+
+      // ✅ AFTER download → redirect
+      setTimeout(() => {
+        router.push("/invoices");
+      }, 500);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    // 🔥 IMPORTANT: handle PDF response
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    // 🔥 Extract filename from header (optional but clean)
-    const contentDisposition = res.headers.get("Content-Disposition");
-    let fileName = "invoice.pdf";
-
-    if (contentDisposition) {
-      const match = contentDisposition.match(/filename="(.+)"/);
-      if (match) fileName = match[1];
-    }
-
-    // 🔥 Trigger download
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    window.URL.revokeObjectURL(url);
-
-    // ✅ AFTER download → redirect
-    setTimeout(() => {
-      router.push("/invoices");
-    }, 500);
-
-  } catch (err) {
-    console.error(err);
-    alert("Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
   return (
     <div className="flex gap-6 p-6 w-full bg-gray-50 dark:bg-slate-900">
-
       {/* LEFT */}
       <div className="w-[35%] space-y-6 overflow-y-auto h-screen pr-2">
-
         <button
           onClick={handleCreate}
           disabled={loading}
@@ -321,24 +313,96 @@ export default function CreateInvoicePage() {
           <h3 className="font-bold">Invoice Setup</h3>
 
           <select
-            value={invoice.type}
+            value={invoice.currency}
             onChange={(e) =>
-              setInvoice((prev) =>
-                prev ? { ...prev, type: e.target.value as any } : prev
-              )
+              setInvoice({
+                ...invoice,
+                currency: e.target.value as Invoice["currency"],
+              })
             }
-            className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="
+    w-full
+    rounded-lg
+    border
+    border-gray-300
+    bg-white
+    px-3
+    py-2
+    text-sm
+    text-gray-900
+    shadow-sm
+    transition
+    focus:outline-none
+    focus:ring-2
+    focus:ring-blue-500
+    focus:border-blue-500
+
+    dark:bg-gray-800
+    dark:border-gray-700
+    dark:text-white
+    dark:focus:ring-blue-400
+  "
           >
-            <option value="standard">-- Select Category --</option>
-            <option value="subscription">Subscription</option>
-            <option value="service">Service</option>
+            {currencies.map((currency) => (
+              <option
+                key={currency.code}
+                value={currency.code}
+                className="bg-white text-black dark:bg-gray-800 dark:text-white"
+              >
+                {currency.code} - {currency.name}
+              </option>
+            ))}
           </select>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="dueDate"
+              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              Due Date
+            </label>
+
+            <input
+              id="dueDate"
+              type="date"
+              value={invoice.dueDate.toString() === "Invalid Date" ? "" : new Date(invoice.dueDate).toISOString().split("T")[0]}
+              onChange={(e) =>
+                setInvoice({
+                  ...invoice,
+                  dueDate: formatDate(e.target.value),
+                })
+              }
+              className="
+      w-full
+      rounded-lg
+      border
+      border-gray-300
+      bg-white
+      px-3
+      py-2
+      text-sm
+      text-gray-900
+      shadow-sm
+      transition
+      focus:outline-none
+      focus:ring-2
+      focus:ring-blue-500
+      focus:border-blue-500
+
+      dark:bg-gray-800
+      dark:border-gray-700
+      dark:text-white
+      dark:focus:ring-blue-400
+    "
+              min={new Date().toISOString().split("T")[0]}
+            />
+          </div>
 
           <TemplateSelector
             selected={invoice.template}
             onSelect={(template) =>
               setInvoice((prev) =>
-                prev ? { ...prev, template: template as any } : prev
+                prev ? { ...prev, template: template as any } : prev,
               )
             }
             isPro={true}
@@ -347,23 +411,26 @@ export default function CreateInvoicePage() {
 
         {/* FORM */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow">
-            <StandardFields
-              invoice={invoice}
-              clients={clients}
-              handleClientChange={handleClientChange}
-              handleSelectClient={handleSelectClient}
-              addItem={addItem}
-              removeItem={removeItem}
-              handleItemChange={handleItemChange}
-              handleDiscount={handleDiscount}
-              handleTax={handleTax}
-            />
+          <StandardFields
+            invoice={invoice}
+            clients={clients}
+            handleClientChange={handleClientChange}
+            handleSelectClient={handleSelectClient}
+            addItem={addItem}
+            removeItem={removeItem}
+            handleItemChange={handleItemChange}
+            handleDiscount={handleDiscount}
+            handleTax={handleTax}
+          />
 
-          {invoice.type === "subscription" && (
-            <SubscriptionFields invoice={invoice} setInvoice={setInvoice as any} />
+          {invoice.template === "bold" && (
+            <SubscriptionFields
+              invoice={invoice}
+              setInvoice={setInvoice as any}
+            />
           )}
 
-          {invoice.type === "service" && (
+          {invoice.template === "minimal" && (
             <ServiceFields invoice={invoice} setInvoice={setInvoice as any} />
           )}
         </div>
@@ -376,17 +443,28 @@ export default function CreateInvoicePage() {
             value={invoice.shipping?.cost || 0}
             onChange={(e) =>
               setInvoice((prev) =>
-                prev ? { ...prev, shipping: { ...prev.shipping, cost: Number(e.target.value) } } : prev
+                prev
+                  ? {
+                      ...prev,
+                      shipping: {
+                        ...prev.shipping,
+                        cost: Number(e.target.value),
+                      },
+                    }
+                  : prev,
               )
             }
             className="w-full p-2 border rounded"
           />
         </div>
 
-          {/* PAYMENT & NOTES */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow">
-        <PaymentAndNotesFields invoice={invoice} setInvoice={setInvoice as any} />
-      </div>
+        {/* PAYMENT & NOTES */}
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow">
+          <PaymentAndNotesFields
+            invoice={invoice}
+            setInvoice={setInvoice as any}
+          />
+        </div>
 
         {/* SUMMARY */}
         <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow text-sm space-y-2">
