@@ -73,15 +73,24 @@ export default function TemplateSelector({
                 : "border-gray-200 dark:border-slate-700"
             } ${locked ? "opacity-60 cursor-not-allowed" : "hover:scale-[1.02]"}`}
           >
-            {/* 🔥 LIVE PREVIEW */}
-            <div className="h-44 bg-gray-100 dark:bg-slate-900 flex items-center justify-center overflow-hidden">
-              <div className="w-225 scale-[0.61] origin-bottom">
-                <div className="rounded-lg overflow-hidden shadow-sm">
-                  <InvoiceRenderer
-                    invoice={{ ...previewInvoice, template: t.id as Invoice["template"] }}
-                    user={previewUser}
-                  />
-                </div>
+
+            {/* PREVIEW */}
+            <div className="h-56 bg-slate-100 dark:bg-slate-900 overflow-hidden flex items-start justify-center p-2">
+              <div
+                className="origin-top"
+                style={{
+                  width: 900,
+                  transform: "scale(0.25)",
+                  transformOrigin: "top center",
+                }}
+              >
+                <InvoiceRenderer
+                  invoice={{
+                    ...previewInvoice,
+                    template: t.id as Invoice["template"],
+                  }}
+                  user={previewUser}
+                />
               </div>
             </div>
 
