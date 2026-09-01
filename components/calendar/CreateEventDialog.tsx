@@ -86,6 +86,7 @@ interface CreateEventDialogProps {
   defaultRelatedTo?: CalendarRelatedTo;
   defaultRelatedLabel?: string; // display name for the locked chip
   onSuccess?: () => void;
+  currentUserId?: string; // for auto-adding the current user as an attendee if not already included
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────

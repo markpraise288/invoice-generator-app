@@ -74,12 +74,6 @@ export interface CalendarRelatedRecord {
   name?: string;
   title?: string;
   email?: string;
-  stage?: string;
-  status?: string;
-  value?: number;
-  position?: string;
-  company?: string;
-  [key: string]: unknown;
 }
 
 export interface EventOwner {
@@ -100,8 +94,8 @@ export interface CalendarEvent {
   timezone: string;
   location?: string;
   meetingUrl?: string;
-  relatedId?: string | CalendarRelatedRecord | null; // was: lead/contact/deal as separate fields
-  relatedTo?: CalendarRelatedTo | null;
+  relatedId?: CalendarRelatedRecord; // was: lead/contact/deal as separate fields
+  relatedTo?: CalendarRelatedTo;
   attendees: EventAttendee[];
   recurrence?: EventRecurrence;
   recurringEventId?: string | null;
