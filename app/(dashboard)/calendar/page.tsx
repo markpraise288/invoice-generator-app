@@ -16,7 +16,6 @@ import { CalendarWeekView } from "@/components/calendar/CalendarWeekView";
 import { CalendarAgendaView } from "@/components/calendar/CalendarAgendaView";
 import { CreateEventDialog } from "@/components/calendar/CreateEventDialog";
 import { EventDetailsDrawer } from "@/components/calendar/EventDetailsDrawer";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
@@ -113,11 +112,9 @@ function UpcomingEventsSidebar({
                       ? "All day"
                       : format(eventDate, "h:mm a")}
                   </span>
-                  {(event.lead || event.contact) && (
                     <span className="text-[11px] text-muted-foreground truncate mt-0.5">
-                      {event.contact?.name ?? event.lead?.name}
+                      {event.relatedId?.name}
                     </span>
-                  )}
                 </div>
 
                 {/* Color dot */}

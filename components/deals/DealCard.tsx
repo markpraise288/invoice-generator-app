@@ -12,7 +12,12 @@ import {
   TrendingUp,
   AlertTriangle,
 } from "lucide-react";
-import { useDeleteDeal, useMoveStage, dealStageConfig, formatDealValue } from "@/hooks/useDeals";
+import {
+  useDeleteDeal,
+  useMoveStage,
+  dealStageConfig,
+  formatDealValue,
+} from "@/hooks/useDeals";
 import type { Deal, DealStage } from "@/hooks/useDeals";
 import {
   DropdownMenu,
@@ -56,10 +61,10 @@ function CloseDateLabel({
   const label = isToday(date)
     ? "Closes today"
     : isTomorrow(date)
-    ? "Closes tomorrow"
-    : isOverdue
-    ? `${format(date, "MMM d")} overdue`
-    : `Close ${format(date, "MMM d")}`;
+      ? "Closes tomorrow"
+      : isOverdue
+        ? `${format(date, "MMM d")} overdue`
+        : `Close ${format(date, "MMM d")}`;
 
   return (
     <span
@@ -68,16 +73,12 @@ function CloseDateLabel({
         isOverdue
           ? "text-rose-500"
           : isToday(date)
-          ? "text-amber-500"
-          : "text-muted-foreground"
+            ? "text-amber-500"
+            : "text-muted-foreground",
       )}
       title={format(date, "PPP")}
     >
-      {isOverdue ? (
-        <AlertTriangle size={10} />
-      ) : (
-        <CalendarClock size={10} />
-      )}
+      {isOverdue ? <AlertTriangle size={10} /> : <CalendarClock size={10} />}
       {label}
     </span>
   );
@@ -94,7 +95,7 @@ function StageMoveMenu({
 }) {
   const stages = Object.entries(dealStageConfig) as [
     DealStage,
-    (typeof dealStageConfig)[DealStage]
+    (typeof dealStageConfig)[DealStage],
   ][];
 
   return (
@@ -109,7 +110,7 @@ function StageMoveMenu({
           disabled={stage === deal.stage}
           className={cn(
             "text-xs gap-2",
-            stage === deal.stage && "opacity-40 cursor-default"
+            stage === deal.stage && "opacity-40 cursor-default",
           )}
         >
           <span
@@ -154,8 +155,7 @@ export function DealCard({ deal, onClick, isDragging }: DealCardProps) {
           "bg-card p-3 cursor-pointer transition-all",
           "hover:border-border/80 hover:shadow-sm",
           isDragging && "shadow-lg rotate-1 opacity-90 scale-[1.02]",
-          deal.isOverdue &&
-            "border-rose-200/60 dark:border-rose-900/40"
+          deal.isOverdue && "border-rose-200/60 dark:border-rose-900/40",
         )}
       >
         {/* ── Header row ── */}
@@ -166,17 +166,14 @@ export function DealCard({ deal, onClick, isDragging }: DealCardProps) {
 
           {/* Actions menu */}
           <div onClick={(e) => e.stopPropagation()}>
-            <DropdownMenu
-              open={showStageMenu}
-              onOpenChange={setShowStageMenu}
-            >
+            <DropdownMenu open={showStageMenu} onOpenChange={setShowStageMenu}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
                   className={cn(
                     "size-6 shrink-0 transition-opacity",
-                    "opacity-0 group-hover:opacity-100"
+                    "opacity-0 group-hover:opacity-100",
                   )}
                 >
                   <MoreHorizontal size={13} />
@@ -219,7 +216,7 @@ export function DealCard({ deal, onClick, isDragging }: DealCardProps) {
               "inline-flex items-center gap-1 text-[11px] font-semibold",
               "px-1.5 py-0.5 rounded-md",
               stageConf.bgClass,
-              stageConf.textClass
+              stageConf.textClass,
             )}
           >
             <TrendingUp size={10} />
@@ -228,12 +225,12 @@ export function DealCard({ deal, onClick, isDragging }: DealCardProps) {
         </div>
 
         {/* ── Contact + company ── */}
-        {(deal.relatedId) && (
+        {deal.relatedId && (
           <div className="flex flex-col gap-1">
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Building2 size={11} className="shrink-0" />
-                <span className="truncate">{deal.relatedId.name}</span>
-              </span>
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Building2 size={11} className="shrink-0" />
+              <span className="truncate">{deal.relatedId.name}</span>
+            </span>
           </div>
         )}
 
@@ -262,16 +259,12 @@ export function DealCard({ deal, onClick, isDragging }: DealCardProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this deal?</AlertDialogTitle>
             <AlertDialogDescription>
-              <span className="font-medium text-foreground">
-                {deal.title}
-              </span>{" "}
+              <span className="font-medium text-foreground">{deal.title}</span>{" "}
               will be permanently removed. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
