@@ -57,19 +57,19 @@ export default function CorporateWave({ invoice, user }: Props) {
           </p>
 
           <p className="font-medium text-gray-900">
-            {invoice.clientSnapshot.name}
+            {invoice.customerSnapshot.name}
           </p>
 
           <p className="text-gray-500">
-            {invoice.clientSnapshot.email}
+            {invoice.customerSnapshot.email}
           </p>
 
           <p className="text-gray-500">
-            {invoice.clientSnapshot.phone}
+            {invoice.customerSnapshot.phone}
           </p>
 
           <p className="text-gray-500">
-            {invoice.clientSnapshot.address}
+            {invoice.customerSnapshot.address}
           </p>
         </div>
 

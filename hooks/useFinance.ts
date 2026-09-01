@@ -1,169 +1,194 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/apiFetch";
-import { Expense, Sale, FinanceStats, MonthlyFinanceData } from "@/types/finance";
-import toast from "react-hot-toast";
+import type { ExpenseCategory } from "@/hooks/useExpenses";
 
-export const useFinanceStats = () => {
+export type BudgetPeriod = "monthly" | "quarterly" | "yearly";
+
+export interface Budget {
+  _id: string;
+  category: ExpenseCategory;
+  limit: number; // cents
+  period: BudgetPeriod;
+  periodStart: string;
+  periodEnd: string;
+  notes?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BudgetWithActual extends Budget {
+  spent: number; // cents
+  remaining: number; // cents
+  percentUsed: number;
+  isOverBudget: boolean;
+}
+
+export interface BudgetsListParams {
+  category?: ExpenseCategory;
+  period?: BudgetPeriod;
+  activeOnly?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export interface BudgetsListResponse {
+  budgets: Budget[];
+  pagination: { total: number; page: number; limit: number; totalPages: number };
+}
+
+export interface CreateBudgetPayload {
+  category: ExpenseCategory;
+  limit: number; // cents
+  period?: BudgetPeriod;
+  periodStart: string;
+  periodEnd: string;
+  notes?: string;
+}
+
+export type UpdateBudgetPayload = Partial<Omit<CreateBudgetPayload, "category">>;
+
+export interface PLPeriodPoint {
+  period: string;
+  revenue: number;
+  expenses: number;
+  profit: number;
+}
+
+export interface ProfitLossReport {
+  totalRevenue: number; // cents
+  totalExpenses: number; // cents
+  netProfit: number; // cents
+  profitMargin: number; // percentage
+  series: PLPeriodPoint[];
+}
+
+export interface CashFlowPeriodPoint {
+  period: string;
+  cashIn: number;
+  cashOut: number;
+  netCashFlow: number;
+}
+
+export interface CashFlowReport {
+  totalCashIn: number; // cents
+  totalCashOut: number; // cents
+  netCashFlow: number; // cents
+  series: CashFlowPeriodPoint[];
+}
+
+export interface ReportDateRange {
+  dateFrom: string;
+  dateTo: string;
+  groupBy?: "day" | "week" | "month";
+}
+
+const buildQueryString = (params: Record<string, unknown>) => {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") search.append(key, String(value));
+  });
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+};
+
+export const financeKeys = {
+  all: ["finance"] as const,
+  budgets: () => [...financeKeys.all, "budgets"] as const,
+  budgetsList: (params: BudgetsListParams) => [...financeKeys.budgets(), params] as const,
+  profitLoss: (params: ReportDateRange) => [...financeKeys.all, "profit-loss", params] as const,
+  cashFlow: (params: ReportDateRange) => [...financeKeys.all, "cash-flow", params] as const,
+  budgetVsActual: (params: Record<string, unknown>) =>
+    [...financeKeys.all, "budget-vs-actual", params] as const,
+};
+
+// ---------- BUDGETS ----------
+
+export const useBudgets = (params: BudgetsListParams = {}) => {
   return useQuery({
-    queryKey: ["finance-stats"],
-    queryFn: async (): Promise<FinanceStats> => {
-      const res = await apiFetch("/finance/stats");
-      return res.data;
+    queryKey: financeKeys.budgetsList(params),
+    queryFn: async () => {
+      const res = await apiFetch(`/finance/budgets${buildQueryString(params)}`);
+      return res.data as BudgetsListResponse;
     },
   });
 };
 
-export const useMonthlyFinanceData = () => {
-  return useQuery({
-    queryKey: ["monthly-finance-data"],
-    queryFn: async (): Promise<MonthlyFinanceData[]> => {
-      const res = await apiFetch("/finance/monthly");
-      return res.data;
-    },
-  });
-};
-
-export const useExpenses = () => {
-  return useQuery({
-    queryKey: ["expenses"],
-    queryFn: async (): Promise<Expense[]> => {
-      const res = await apiFetch("/expenses");
-      return res.data.data;
-    },
-  });
-};
-
-export const useCreateExpense = () => {
+export const useCreateBudget = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Omit<Expense, "id" | "createdAt" | "updatedAt">) => {
-      const res = await apiFetch("/expenses", {
+    mutationFn: async (payload: CreateBudgetPayload) => {
+      const res = await apiFetch("/finance/budgets", {
         method: "POST",
+        body: JSON.stringify(payload),
+      });
+      return res.data as Budget;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: financeKeys.all });
+    },
+  });
+};
+
+export const useUpdateBudget = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: UpdateBudgetPayload }) => {
+      const res = await apiFetch(`/finance/budgets/${id}`, {
+        method: "PUT",
         body: JSON.stringify(data),
       });
-      return res.data;
+      return res.data as Budget;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["finance-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["monthly-finance-data"] });
-      toast.success("Expense created successfully!");
-    },
-    onError: (error: Error) => {
-      toast.error(`Error: ${error.message}`);
+      queryClient.invalidateQueries({ queryKey: financeKeys.all });
     },
   });
 };
 
-export const useUpdateExpense = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: Expense) => {
-      const res = await apiFetch(`/expenses/${data._id}`, {
-        method: "PUT",
-        body: JSON.stringify({title: data.title, amount: data.amount, category: data.category, date: data.date, notes: data.notes}),
-      });
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["finance-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["monthly-finance-data"] });
-      toast.success("Expense updated successfully!");
-    },
-    onError: (error: Error) => {
-      toast.error(`Error: ${error.message}`);
-    },
-  });
-};
-
-export const useDeleteExpense = () => {
+export const useDeleteBudget = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await apiFetch(`/expenses/${id}`, { method: "DELETE" });
+      const res = await apiFetch(`/finance/budgets/${id}`, { method: "DELETE" });
+      return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["finance-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["monthly-finance-data"] });
-      toast.success("Expense deleted successfully!");
-    },
-    onError: (error: Error) => {
-      toast.error(`Error: ${error.message}`);
+      queryClient.invalidateQueries({ queryKey: financeKeys.all });
     },
   });
 };
 
-export const useSales = () => {
+// ---------- REPORTS ----------
+
+export const useProfitAndLoss = (params: ReportDateRange) => {
   return useQuery({
-    queryKey: ["sales"],
-    queryFn: async (): Promise<Sale[]> => {
-      const res = await apiFetch("/sales");
-      const data = res.data.data;
-      return data;
+    queryKey: financeKeys.profitLoss(params),
+    queryFn: async () => {
+      const res = await apiFetch(`/finance/profit-loss${buildQueryString(params)}`);
+      return res.data as ProfitLossReport;
     },
+    enabled: !!params.dateFrom && !!params.dateTo,
   });
 };
 
-export const useCreateSale = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: Omit<Sale, "id" | "createdAt" | "updatedAt">) => {
-      const res = await apiFetch("/sales", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-      return res.data;
+export const useCashFlow = (params: ReportDateRange) => {
+  return useQuery({
+    queryKey: financeKeys.cashFlow(params),
+    queryFn: async () => {
+      const res = await apiFetch(`/finance/cash-flow${buildQueryString(params)}`);
+      return res.data as CashFlowReport;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sales"] });
-      queryClient.invalidateQueries({ queryKey: ["finance-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["monthly-finance-data"] });
-      toast.success("Sale recorded successfully!");
-    },
-    onError: (error: Error) => {
-      toast.error(`Error: ${error.message}`);
-    },
+    enabled: !!params.dateFrom && !!params.dateTo,
   });
 };
 
-export const useUpdateSale = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (data: Sale) => {
-      const res = await apiFetch(`/sales/${data._id}`, {
-        method: "PUT",
-        body: JSON.stringify({client: data.client, amount: data.amount, status: data.status, date: data.date}),
-      });
-      return res.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sales"] });
-      queryClient.invalidateQueries({ queryKey: ["finance-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["monthly-finance-data"] });
-      toast.success("Sale updated successfully!");
-    },
-    onError: (error: Error) => {
-      toast.error(`Error: ${error.message}`);
-    },
-  });
-};
-
-export const useDeleteSale = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      await apiFetch(`/sales/${id}`, { method: "DELETE" });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sales"] });
-      queryClient.invalidateQueries({ queryKey: ["finance-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["monthly-finance-data"] });
-      toast.success("Sale deleted successfully!");
-    },
-    onError: (error: Error) => {
-      toast.error(`Error: ${error.message}`);
+export const useBudgetVsActual = (params: { periodStart?: string; periodEnd?: string } = {}) => {
+  return useQuery({
+    queryKey: financeKeys.budgetVsActual(params),
+    queryFn: async () => {
+      const res = await apiFetch(`/finance/budget-vs-actual${buildQueryString(params)}`);
+      return res.data as BudgetWithActual[];
     },
   });
 };

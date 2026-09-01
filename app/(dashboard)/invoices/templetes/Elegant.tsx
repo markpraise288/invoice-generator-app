@@ -82,13 +82,13 @@ const ElegantInvoiceTemplate: React.FC<Props> = ({ invoice, user }) => {
           Bill To
         </h3>
         <p className="font-semibold">
-          {invoice.clientSnapshot.name}
+          {invoice.customerSnapshot.name}
         </p>
         <p className="text-sm text-gray-500">
-          {invoice.clientSnapshot.email}
+          {invoice.customerSnapshot.email}
         </p>
         <p className="text-sm text-gray-500">
-          {invoice.clientSnapshot.address}
+          {invoice.customerSnapshot.address}
         </p>
       </div>
 

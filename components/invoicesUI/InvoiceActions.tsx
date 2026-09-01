@@ -1,3 +1,5 @@
+// components/invoicesUI/InvoiceActions.tsx
+
 "use client";
 
 import Link from "next/link";
@@ -5,14 +7,16 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { Button } from "@/components/ui/button";
 import {
   MoreHorizontal,
   Eye,
   CircleDollarSign,
-  Trash,
+  Trash2,
+  Download,
 } from "lucide-react";
 
 type Props = {
@@ -29,57 +33,65 @@ export default function InvoiceActions({
   downloadInvoice,
 }: Props) {
   return (
-    <td className="p-3 text-left">
+    <td className="px-4 py-3 text-right">
       <DropdownMenu>
-        {/* Trigger */}
         <DropdownMenuTrigger asChild>
-          <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            <MoreHorizontal size={18} />
-          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-7 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            <MoreHorizontal size={16} />
+          </Button>
         </DropdownMenuTrigger>
 
-        {/* Menu */}
-        <DropdownMenuContent
-          align="end"
-          className="w-44 rounded-xl shadow-lg"
-        >
+        <DropdownMenuContent align="end" className="w-44">
           {/* Preview */}
-          <DropdownMenuItem asChild>
-            <Link
-              href={`/invoices/${invoice._id}`}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <Eye size={16} className="text-gray-600" />
-              <span>Preview</span>
+          <DropdownMenuItem asChild className="text-xs gap-2">
+            <Link href={`/invoices/${invoice._id}`}>
+              <Eye size={13} className="text-muted-foreground" />
+              Preview
             </Link>
           </DropdownMenuItem>
 
-          {/* Add Payment */}
+          {/* Add Payment — onSelect + preventDefault + deferred state update
+              avoids the Radix dropdown-close vs dialog-open race condition */}
           <DropdownMenuItem
-            onClick={() => updateInvoice(invoice)}
-            className="flex items-center gap-2 cursor-pointer"
+            className="text-xs gap-2"
+            onSelect={(e) => {
+              e.preventDefault();
+              setTimeout(() => updateInvoice(invoice), 0);
+            }}
           >
-            <CircleDollarSign size={16} className="text-blue-600" />
-            <span>Add Payment</span>
+            <CircleDollarSign size={13} className="text-emerald-500" />
+            Add payment
           </DropdownMenuItem>
 
-          {/* Divider */}
-          <div className="h-px bg-gray-200 my-1" />
+          {/* Download — same deferral pattern, in case downloadInvoice ever
+              opens UI (a toast, a new tab prompt, etc.) */}
+          <DropdownMenuItem
+            className="text-xs gap-2"
+            onSelect={(e) => {
+              e.preventDefault();
+              setTimeout(() => downloadInvoice(invoice), 0);
+            }}
+          >
+            <Download size={13} className="text-muted-foreground" />
+            Download
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
 
           {/* Delete */}
           <DropdownMenuItem
-            onClick={() => invoice._id && onDelete(invoice._id)}
-            className="flex items-center gap-2 text-red-600 focus:text-red-600 cursor-pointer"
+            className="text-xs gap-2 text-destructive focus:text-destructive"
+            onSelect={(e) => {
+              e.preventDefault();
+              setTimeout(() => invoice._id && onDelete(invoice._id), 0);
+            }}
           >
-            <Trash size={16} />
-            <span>Delete</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => downloadInvoice(invoice)}
-            className="flex items-center gap-2 text-green-600 focus:text-green-600 cursor-pointer"
-          >
-            <CircleDollarSign size={16} />
-            <span>Download</span>
+            <Trash2 size={13} />
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

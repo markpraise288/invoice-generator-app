@@ -2,7 +2,6 @@
 
 import InvoiceRenderer from "@/components/invoicesUI/InvoiceRenderer";
 import { Invoice, User } from "@/types";
-import { tr } from "framer-motion/client";
 
 interface Props {
   selected: Invoice["template"];
@@ -18,7 +17,7 @@ const previewInvoice: Invoice = {
   currency: "USD",
   dueDate: new Date().toISOString(),
 
-  clientSnapshot: {
+  customerSnapshot: {
     name: "John Client",
     email: "client@email.com",
     phone: "123456789",

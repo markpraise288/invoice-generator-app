@@ -2,7 +2,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 let refreshPromise: Promise<boolean> | null = null;
 
-async function refreshAccessToken() {
+export async function refreshAccessToken() {
   if (!refreshPromise) {
     refreshPromise = (async () => {
       const res = await fetch(`${API_BASE}/auth/accessToken`, {
@@ -12,7 +12,7 @@ async function refreshAccessToken() {
 
       refreshPromise = null;
 
-      if (res.status === 401) {
+      if (res.status === 403) {
         window.location.href = "/login";
         return false;
       };
@@ -28,11 +28,18 @@ export async function apiFetch(
   options: RequestInit = {}
 ) {
   const makeRequest = async () => {
+    // FormData needs the browser to set its own Content-Type with a
+    // multipart boundary — forcing "application/json" here (the old
+    // default) breaks every file upload, since the server can't parse a
+    // multipart body without that boundary parameter.
+    const isFormData = options.body instanceof FormData;
+
     return fetch(`${API_BASE}${endpoint}`, {
       ...options,
       credentials: "include",
       headers: {
-        "Content-Type": "application/json",
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        "ngrok-skip-browser-warning": "true",
         ...(options.headers || {}),
       },
     });

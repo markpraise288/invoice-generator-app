@@ -50,10 +50,10 @@ export default function Classic({ invoice, user }: Props) {
       {/* BILL TO */}
       <div className="mb-8">
         <h2 className="text-blue-700 text-xl mb-2">Bill To:</h2>
-        <p>{invoice.clientSnapshot.name}</p>
-        <p>{invoice.clientSnapshot.address}</p>
-        <p>{invoice.clientSnapshot.phone}</p>
-        <p>{invoice.clientSnapshot.email}</p>
+        <p>{invoice.customerSnapshot.name}</p>
+        <p>{invoice.customerSnapshot.address}</p>
+        <p>{invoice.customerSnapshot.phone}</p>
+        <p>{invoice.customerSnapshot.email}</p>
       </div>
 
       {/* ITEMS */}

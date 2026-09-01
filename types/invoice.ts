@@ -32,7 +32,7 @@ export interface InvoiceItem {
   total?: number; // computed
 }
 
-export interface ClientSnapshot {
+export interface CustomerSnapshot {
   name: string;
   email: string;
   phone: string;
@@ -43,7 +43,7 @@ export interface ClientSnapshot {
   taxId?: string;
 }
 
-export type InvoiceType = "standard" | "service" | "subscription" | "freelance";
+export type InvoiceType = "standard" | "service" | "subscription";
 
 export type InvoiceTemplate =
   | "modern"
@@ -74,7 +74,7 @@ export interface Invoice {
   viewedAt?: string;
   paidAt?: string;
 
-  clientSnapshot: ClientSnapshot;
+  customerSnapshot: CustomerSnapshot;
 
   // 🔥 ITEMS (core)
   items: InvoiceItem[];
@@ -89,6 +89,7 @@ export interface Invoice {
   // 🔥 SUBSCRIPTION
   subscriptionDetails?: {
     planName: string;
+    planPrice: number;
     billingCycle: "monthly" | "yearly";
     startDate: string;
     endDate?: string;

@@ -1,19 +1,25 @@
 import Navbar from "@/components/ui/Navbar";
 import Hero from "@/components/ui/Hero";
+import StatsStrip from "@/components/ui/StatsStrip";
 import Features from "@/components/ui/Features";
+import ProductShowcase from "@/components/ui/ProductShowcase";
 import Testimonials from "@/components/ui/Testimonials";
-import Footer from "@/components/ui/Footer";
+import Pricing from "@/components/ui/Pricing";
+import FAQ from "@/components/ui/FAQ";
 import CTA from "@/components/ui/CTA";
-import Contacts from "@/components/ui/Contacts";
+import Footer from "@/components/ui/Footer";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <main className="bg-white dark:bg-black text-gray-900 dark:text-white">
+    <main>
       <Navbar />
       <Hero />
+      <StatsStrip />
       <Features />
+      <ProductShowcase />
       <Testimonials />
-      <Contacts />
+      <Pricing />
+      <FAQ />
       <CTA />
       <Footer />
     </main>

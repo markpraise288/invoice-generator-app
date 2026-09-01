@@ -106,10 +106,10 @@ const CompactInvoiceTemplate: React.FC<CompactInvoiceProps> = ({
             Bill To
           </h3>
           <p className="font-semibold text-gray-900">
-            {invoice.clientSnapshot.name}
+            {invoice.customerSnapshot.name}
           </p>
           <p className="text-sm text-gray-500 whitespace-pre-line">
-            {invoice.clientSnapshot.address}
+            {invoice.customerSnapshot.address}
           </p>
         </div>
       </div>

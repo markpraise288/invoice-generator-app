@@ -1,71 +1,68 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
+import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    name: "John Mwale",
-    role: "Freelancer",
-    text: "InvoiceFlow completely changed how I manage my clients. Creating invoices is now effortless.",
+    quote:
+      "We were juggling an invoicing tool, a spreadsheet for expenses, and a separate CRM. BusinessFlow replaced all three in a week.",
+    name: "Priya Shah",
+    role: "Founder, Northline Consulting",
+    // IMAGE: 80x80px circular headshot
+    avatar: "/testimonials/priya-shah.jpg",
   },
   {
-    name: "Sarah Banda",
-    role: "Small Business Owner",
-    text: "I love how simple and powerful it is. The analytics help me track my income clearly.",
+    quote:
+      "The moment a deal closes, it's already an invoice. That handoff alone saves us a few hours every week.",
+    name: "Marcus Webb",
+    role: "Operations Lead, Foundry Studio",
+    avatar: "/testimonials/marcus-webb.jpg",
   },
   {
-    name: "Kelvin Phiri",
-    role: "Startup Founder",
-    text: "Professional, fast, and reliable. This is exactly what I needed for my business.",
+    quote:
+      "Finance finally makes sense to me. I can see cash flow and P&L without exporting anything to Excel first.",
+    name: "Elena Torres",
+    role: "Co-founder, Bright Path Agency",
+    avatar: "/testimonials/elena-torres.jpg",
   },
 ];
 
 export default function Testimonials() {
   return (
-    <section className="py-24 px-6 bg-white dark:bg-black">
-      <div className="max-w-7xl mx-auto text-center">
-        
-        {/* HEADER */}
-        <motion.h2
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl font-bold"
-        >
-          Trusted by Businesses Worldwide
-        </motion.h2>
+    <section className="py-24 px-6 bg-white dark:bg-gray-950">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto">
+          <p className="font-mono text-sm text-indigo-600 dark:text-teal-400">Customers</p>
+          <h2 className="mt-2 font-display text-4xl font-bold text-gray-900 dark:text-white">
+            Built for businesses like yours
+          </h2>
+        </div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-4 text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
-        >
-          Thousands of freelancers and businesses rely on InvoiceFlow to manage their invoicing.
-        </motion.p>
-
-        {/* TESTIMONIAL CARDS */}
-        <div className="mt-16 grid md:grid-cols-3 gap-8">
+        <div className="mt-16 grid md:grid-cols-3 gap-6">
           {testimonials.map((t, i) => (
             <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
+              key={t.name}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.15 }}
-              whileHover={{ y: -8 }}
-              className="p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-xl transition bg-white dark:bg-gray-900 text-left"
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              className="rounded-2xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col"
             >
-              {/* TEXT */}
-              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                “{t.text}”
-              </p>
-
-              {/* USER */}
+              <Quote size={24} className="text-indigo-200 dark:text-indigo-900" />
+              <p className="mt-4 text-gray-700 dark:text-gray-300 flex-1">"{t.quote}"</p>
               <div className="mt-6 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-700" />
+                <Image
+                  src={t.avatar}
+                  alt={`${t.name} headshot`}
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover h-10 w-10"
+                />
                 <div>
-                  <p className="text-sm font-semibold">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role}</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t.role}</p>
                 </div>
               </div>
             </motion.div>

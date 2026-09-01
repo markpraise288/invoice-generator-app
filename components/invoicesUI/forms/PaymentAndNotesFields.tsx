@@ -13,135 +13,167 @@ export default function PaymentAndNotesFields({
   invoice,
   setInvoice,
 }: Props) {
-  const paymentMethods = invoice.paymentMethods || [
+  const paymentMethods = invoice.paymentMethods ?? [
     { method: "", details: "" },
   ];
 
-  // ===== ADD PAYMENT METHOD =====
+  const updateInvoiceField = (
+    field: "terms" | "notes",
+    value: string
+  ) => {
+    setInvoice((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const addPaymentMethod = () => {
-    setInvoice((prev: any) => ({
+    setInvoice((prev) => ({
       ...prev,
       paymentMethods: [
-        ...(prev.paymentMethods || []),
+        ...(prev.paymentMethods ?? []),
         { method: "", details: "" },
       ],
     }));
   };
 
-  // ===== REMOVE PAYMENT METHOD =====
   const removePaymentMethod = (index: number) => {
-    setInvoice((prev: any) => ({
+    setInvoice((prev) => ({
       ...prev,
-      paymentMethods: prev.paymentMethods.filter(
-        (_: any, i: number) => i !== index
-      ),
+      paymentMethods:
+        prev.paymentMethods?.filter((_, i) => i !== index) ?? [],
     }));
   };
 
-  // ===== UPDATE PAYMENT METHOD =====
   const updatePaymentMethod = (
     index: number,
     field: "method" | "details",
     value: string
   ) => {
-        setInvoice((prev: any) => ({
+    setInvoice((prev) => ({
       ...prev,
-      paymentMethods: (prev.paymentMethods || []).map(
-        (pm: any, i: number) =>
-          i === index ? { ...pm, [field]: value } : pm
-      ),
+      paymentMethods:
+        prev.paymentMethods?.map((paymentMethod, i) =>
+          i === index
+            ? { ...paymentMethod, [field]: value }
+            : paymentMethod
+        ) ?? [],
     }));
   };
 
   return (
     <div className="space-y-6">
+      {/* ================= PAYMENT METHODS ================= */}
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Payment Methods
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400">
+              Add one or more payment options for your client.
+            </p>
+          </div>
 
-      {/* 🔥 PAYMENT METHODS */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="font-bold text-lg">Payment Methods</h3>
           <button
+            type="button"
             onClick={addPaymentMethod}
-            className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+            className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
           >
             <Plus size={16} />
             Add Method
           </button>
         </div>
 
-        {paymentMethods.map((pm: any, index: number) => (
-          <div
-            key={index}
-            className="border rounded-lg p-3 space-y-2 relative"
-          >
-            {/* REMOVE BUTTON */}
-            {paymentMethods.length > 1 && (
-              <button
-                onClick={() => removePaymentMethod(index)}
-                className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-              >
-                <Trash2 size={16} />
-              </button>
-            )}
+        <div className="space-y-3">
+          {paymentMethods.map((paymentMethod, index) => (
+            <div
+              key={index}
+              className="relative rounded-xl border border-gray-200 p-4 dark:border-slate-700"
+            >
+              {paymentMethods.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removePaymentMethod(index)}
+                  className="absolute right-3 top-3 text-red-500 transition hover:text-red-600"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
 
-            {/* METHOD TYPE */}
-            <input
-              type="text"
-              placeholder="Payment Method (e.g. Bank, PayPal, Airtel Money)"
-              value={pm.method}
-              onChange={(e) =>
-                updatePaymentMethod(index, "method", e.target.value)
-              }
-              className="w-full border p-2 rounded-lg text-sm"
-            />
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  placeholder="Payment Method (Bank Transfer, PayPal, Airtel Money...)"
+                  value={paymentMethod.method}
+                  onChange={(e) =>
+                    updatePaymentMethod(
+                      index,
+                      "method",
+                      e.target.value
+                    )
+                  }
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                />
 
-            {/* DETAILS */}
-            <input
-              type="text"
-              placeholder="Details (Account number, email, phone...)"
-              value={pm.details}
-              onChange={(e) =>
-                updatePaymentMethod(index, "details", e.target.value)
-              }
-              className="w-full border p-2 rounded-lg text-sm"
-            />
-          </div>
-        ))}
-      </div>
+                <input
+                  type="text"
+                  placeholder="Account Number, Email, Phone Number..."
+                  value={paymentMethod.details}
+                  onChange={(e) =>
+                    updatePaymentMethod(
+                      index,
+                      "details",
+                      e.target.value
+                    )
+                  }
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      {/* 🔥 TERMS */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow space-y-2">
-        <h3 className="font-bold text-lg">Terms & Conditions</h3>
+      {/* ================= TERMS ================= */}
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+          Terms & Conditions
+        </h3>
+
+        <p className="mb-3 text-sm text-gray-500 dark:text-slate-400">
+          Specify payment terms and important conditions.
+        </p>
 
         <textarea
-          placeholder="e.g. Payment due within 7 days. Late fee applies after due date..."
-          value={invoice.terms || ""}
+          placeholder="Payment due within 7 days. Late fees may apply after the due date..."
+          value={invoice.terms ?? ""}
           onChange={(e) =>
-            setInvoice((prev: any) => ({
-              ...prev,
-              terms: e.target.value,
-            }))
+            updateInvoiceField("terms", e.target.value)
           }
-          className="w-full border p-3 rounded-lg text-sm min-h-25"
+          className="min-h-30 w-full rounded-lg border border-gray-300 bg-white p-3 text-sm outline-none transition focus:border-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
         />
-      </div>
+      </section>
 
-      {/* 🔥 NOTES */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow space-y-2">
-        <h3 className="font-bold text-lg">Notes</h3>
+      {/* ================= NOTES ================= */}
+      <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <h3 className="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
+          Notes
+        </h3>
+
+        <p className="mb-3 text-sm text-gray-500 dark:text-slate-400">
+          Add a personal message or additional information for your client.
+        </p>
 
         <textarea
-          placeholder="Add a personal message to your client..."
-          value={invoice.notes || ""}
+          placeholder="Thank you for your business. We appreciate your support."
+          value={invoice.notes ?? ""}
           onChange={(e) =>
-            setInvoice((prev: any) => ({
-              ...prev,
-              notes: e.target.value,
-            }))
+            updateInvoiceField("notes", e.target.value)
           }
-          className="w-full border p-3 rounded-lg text-sm min-h-25"
+          className="min-h-30 w-full rounded-lg border border-gray-300 bg-white p-3 text-sm outline-none transition focus:border-blue-500 dark:border-slate-600 dark:bg-slate-900 dark:text-white"
         />
-      </div>
+      </section>
     </div>
   );
 }

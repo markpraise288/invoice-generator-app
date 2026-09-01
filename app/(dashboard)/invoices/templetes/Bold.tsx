@@ -21,7 +21,7 @@ const SubscriptionInvoiceTemplate: React.FC<SubscriptionInvoiceProps> = ({
 }) => {
   const sub = invoice.subscriptionDetails;
 
-  const price = invoice.items?.[0]?.price || 0;
+  const price = sub?.planPrice || 0;
 
   const discount =
     invoice.discount?.type === "percentage"
@@ -74,10 +74,10 @@ const SubscriptionInvoiceTemplate: React.FC<SubscriptionInvoiceProps> = ({
         <div>
           <p className="text-xs text-gray-400 uppercase mb-2">Bill To</p>
           <p className="font-semibold text-gray-900">
-            {invoice.clientSnapshot.name}
+            {invoice.customerSnapshot.name}
           </p>
           <p className="text-sm text-gray-500">
-            {invoice.clientSnapshot.email}
+            {invoice.customerSnapshot.email}
           </p>
         </div>
 

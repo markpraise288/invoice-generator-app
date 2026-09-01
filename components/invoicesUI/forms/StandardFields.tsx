@@ -1,13 +1,13 @@
 "use client";
 
-import { Client, InvoiceItem } from "@/types";
+import { InvoiceItem, Invoice } from "@/types";
 import { Plus, Trash2 } from "lucide-react";
-
+import { Customer } from "@/types/Customer"
 interface StandardFieldsProps {
-  invoice: any;
-  clients: Client[];
-  handleSelectClient: (id: string) => void;
-  handleClientChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  invoice: Invoice;
+  customers: Customer[];
+  handleSelectCustomer: (id: string) => void;
+  handleCustomerChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleItemChange: <K extends keyof InvoiceItem>(
     index: number,
     field: K,
@@ -21,9 +21,9 @@ interface StandardFieldsProps {
 
 export default function StandardFields({
   invoice,
-  clients,
-  handleSelectClient,
-  handleClientChange,
+  customers,
+  handleSelectCustomer,
+  handleCustomerChange,
   handleItemChange,
   addItem,
   removeItem,
@@ -35,14 +35,14 @@ export default function StandardFields({
 
       {/* 🔹 CLIENT SELECT */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm">
-        <h3 className="font-semibold mb-3">Select Client</h3>
+        <h3 className="font-semibold mb-3">Select Customer</h3>
 
         <select
-          onChange={(e) => handleSelectClient(e.target.value)}
-          className="w-full p-2 rounded-lg border dark:bg-slate-700"
+          onChange={(e) => handleSelectCustomer(e.target.value)}
+          className="w-full p-2 rounded-lg border dark:bg-slate-900 dark:border-slate-600"
         >
-          <option value="">-- Select Client --</option>
-          {clients.map((c) => (
+          <option value="">-- Select Customer --</option>
+          {customers.map((c) => (
             <option key={c._id} value={c._id}>
               {c.name}
             </option>
@@ -52,35 +52,35 @@ export default function StandardFields({
 
       {/* 🔹 CLIENT INFO */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm space-y-2">
-        <h3 className="font-semibold">Client Info</h3>
+        <h3 className="font-semibold">Customer Info</h3>
 
         <input
           name="name"
-          value={invoice.clientSnapshot.name}
-          onChange={handleClientChange}
-          placeholder="Client Name"
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+          value={invoice.customerSnapshot.name}
+          onChange={handleCustomerChange}
+          placeholder="Customer Name"
+          className="input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
         <input
           name="email"
-          value={invoice.clientSnapshot.email}
-          onChange={handleClientChange}
+          value={invoice.customerSnapshot.email}
+          onChange={handleCustomerChange}
           placeholder="Email"
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+          className="input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
         <input
           name="phone"
-          value={invoice.clientSnapshot.phone}
-          onChange={handleClientChange}
+          value={invoice.customerSnapshot.phone}
+          onChange={handleCustomerChange}
           placeholder="Phone"
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+          className="input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
         <input
           name="address"
-          value={invoice.clientSnapshot.address}
-          onChange={handleClientChange}
+          value={invoice.customerSnapshot.address}
+          onChange={handleCustomerChange}
           placeholder="Address"
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+          className="input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
       </div>
 
@@ -94,7 +94,7 @@ export default function StandardFields({
               <div key={i} className="grid grid-cols-12 gap-2 items-center">
                 <input
                   placeholder="Description"
-                  className="col-span-5 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  className="col-span-5 input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                   value={item.description}
                   onChange={(e) => handleItemChange(i, "description", e.target.value)}
                 />
@@ -102,16 +102,16 @@ export default function StandardFields({
                 <input
                   type="number"
                   placeholder="Qty"
-                  className="col-span-2 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                  value={item.quantity}
+                  className="col-span-2 input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  value={item.quantity || "Qty"}
                   onChange={(e) => handleItemChange(i, "quantity", Number(e.target.value))}
                 />
 
                 <input
                   type="number"
                   placeholder="Price"
-                  className="col-span-3 input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                  value={item.price}
+                  className="col-span-3 input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  value={item.price || "Price"}
                   onChange={(e) => handleItemChange(i, "price", Number(e.target.value))}
                 />
 
@@ -139,7 +139,7 @@ export default function StandardFields({
           placeholder="Discount %"
           value={invoice.discount.value || ""}
           onChange={(e) => handleDiscount(e.target.value)}
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+          className="input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
         />
 
         <input
@@ -147,7 +147,7 @@ export default function StandardFields({
           placeholder="Tax %"
           value={invoice.tax.value || ""}
           onChange={(e) => handleTax(e.target.value)}
-          className="input dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+          className="input dark:bg-slate-900 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
           aria-controls="none"
         />
       </div>

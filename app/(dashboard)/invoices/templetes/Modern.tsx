@@ -81,13 +81,13 @@ const ModernInvoiceTemplate: React.FC<ModernInvoiceProps> = ({ invoice, user }) 
           <div>
             <p className="text-xs uppercase text-gray-400 mb-2">Bill To</p>
             <p className="font-semibold text-gray-900">
-              {invoice.clientSnapshot.name}
+              {invoice.customerSnapshot.name}
             </p>
             <p className="text-sm text-gray-500">
-              {invoice.clientSnapshot.email}
+              {invoice.customerSnapshot.email}
             </p>
             <p className="text-sm text-gray-500">
-              {invoice.clientSnapshot.address}
+              {invoice.customerSnapshot.address}
             </p>
           </div>
 

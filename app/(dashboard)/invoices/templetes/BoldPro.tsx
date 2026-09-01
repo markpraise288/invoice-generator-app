@@ -68,12 +68,12 @@ const BoldCorporateTemplate: React.FC<Props> = ({ invoice, user }) => {
           <h3 className="text-sm font-semibold text-gray-500 mb-2">
             Bill To
           </h3>
-          <p className="font-semibold">{invoice.clientSnapshot.name}</p>
+          <p className="font-semibold">{invoice.customerSnapshot.name}</p>
           <p className="text-sm text-gray-500">
-            {invoice.clientSnapshot.email}
+            {invoice.customerSnapshot.email}
           </p>
           <p className="text-sm text-gray-500">
-            {invoice.clientSnapshot.address}
+            {invoice.customerSnapshot.address}
           </p>
         </div>
 

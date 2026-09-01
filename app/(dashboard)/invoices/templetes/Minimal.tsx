@@ -36,7 +36,7 @@ const ServiceInvoiceTemplate: React.FC<Props> = ({ invoice, user }) => {
       ? afterDiscount * (invoice.tax.value / 100)
       : invoice.tax?.value || 0;
 
-  const shipping = Number(invoice.shipping || 0);
+  const shipping = Number(invoice.shipping?.cost || 0);
 
   const total = afterDiscount + taxAmount + shipping;
 
@@ -93,13 +93,13 @@ const ServiceInvoiceTemplate: React.FC<Props> = ({ invoice, user }) => {
         <div>
           <p className="text-xs text-gray-400 uppercase mb-2">Bill To</p>
           <p className="font-semibold text-gray-900">
-            {invoice.clientSnapshot.name}
+            {invoice.customerSnapshot.name}
           </p>
           <p className="text-sm text-gray-500">
-            {invoice.clientSnapshot.email}
+            {invoice.customerSnapshot.email}
           </p>
           <p className="text-sm text-gray-500">
-            {invoice.clientSnapshot.address}
+            {invoice.customerSnapshot.address}
           </p>
         </div>
 

@@ -2,76 +2,208 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Search, SlidersHorizontal } from "lucide-react";
+import {
+  FileText,
+  Search,
+  SlidersHorizontal,
+  Plus,
+  X,
+  ChevronDown,
+  DollarSign,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+} from "lucide-react";
 
 import { Invoice, Payment } from "@/types";
 import InvoicesTable from "@/components/invoicesUI/InvoiceTable";
 import { Button } from "@/components/ui/button";
-import { useInvoices, useDeleteInvoice, useUpdateInvoice } from "@/hooks/useInvoices";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { apiFetch } from "@/lib/apiFetch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import {
+  useInvoices,
+  useDeleteInvoice,
+  useUpdateInvoice,
+  useDownloadInvoice,
+  computeInvoiceStatus,
+  formatMoney,
+} from "@/hooks/useInvoices";
+
+// ─── Stat Card ─────────────────────────────────────────────────────────────────
+
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  iconClass,
+  bgClass,
+  isLoading,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  iconClass: string;
+  bgClass: string;
+  isLoading?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
+      <div
+        className={cn(
+          "size-9 rounded-lg flex items-center justify-center shrink-0",
+          bgClass
+        )}
+      >
+        <Icon size={16} className={iconClass} />
+      </div>
+      <div className="flex flex-col min-w-0">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-5 w-16 mb-1" />
+            <Skeleton className="h-3 w-20" />
+          </>
+        ) : (
+          <>
+            <span className="text-lg font-bold text-foreground leading-none truncate">
+              {value}
+            </span>
+            <span className="text-xs text-muted-foreground mt-0.5">
+              {label}
+            </span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Filter options ──────────────────────────────────────────────────────────
+
+const STATUS_OPTIONS = [
+  { value: "all", label: "All status" },
+  { value: "paid", label: "Paid" },
+  { value: "partial", label: "Partial" },
+  { value: "overdue", label: "Overdue" },
+  { value: "draft", label: "Draft" },
+];
+
+const DATE_OPTIONS = [
+  { value: "all", label: "All dates" },
+  { value: "thisMonth", label: "This month" },
+  { value: "lastMonth", label: "Last month" },
+];
+
+const SORT_OPTIONS: { value: "none" | "asc" | "desc"; label: string }[] = [
+  { value: "none", label: "Default order" },
+  { value: "desc", label: "Amount: High to low" },
+  { value: "asc", label: "Amount: Low to high" },
+];
+
+// ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function InvoicesPage() {
   const router = useRouter();
   const { data: invoices = [], isLoading } = useInvoices();
   const deleteMutation = useDeleteInvoice();
   const updateMutation = useUpdateInvoice();
+  const downloadMutation = useDownloadInvoice();
 
   const [isPaying, setIsPaying] = useState(false);
   const [updatedInvoice, setUpdatedInvoice] = useState<Invoice | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const [paymentDetails, setPaymentDetails] = useState<Payment>({
     amount: 0,
     date: new Date().toISOString(),
   });
 
-  // 🔥 FILTER STATES
+  // ── Filter state ──────────────────────────────────────────────────────────
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [sortAmount, setSortAmount] = useState<"none" | "asc" | "desc">("none");
+  const [sortAmount, setSortAmount] = useState<"none" | "asc" | "desc">(
+    "none"
+  );
   const [dateFilter, setDateFilter] = useState("all");
 
-  // 🔥 COMPUTE STATUS (REAL LOGIC)
-  const computeStatus = (invoice: Invoice) => {
-    const totalPaid =
-      invoice.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+  // ── Stats ──────────────────────────────────────────────────────────────────
 
-    const dueDate = new Date(invoice.dueDate);
-    const today = new Date();
+  const stats = useMemo(() => {
+    const visible = invoices.filter((inv) => !inv.isDeleted);
 
-    if (totalPaid === 0) return "draft";
-    if (totalPaid < invoice.total!) {
-      if (dueDate < today) return "overdue";
-      return "partial";
-    }
-    if (totalPaid === invoice.total) return "paid";
+    let totalCollected = 0;
+    let totalOutstanding = 0;
+    let overdueCount = 0;
+    let paidCount = 0;
 
-    return invoice.status;
-  };
+    visible.forEach((inv) => {
+      const paid =
+        inv.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+      const remaining = (inv.total ?? 0) - paid;
+      const status = computeInvoiceStatus(inv);
 
-  // 🔥 FILTER + SORT ENGINE
+      totalCollected += paid;
+      if (status !== "paid") totalOutstanding += remaining;
+      if (status === "overdue") overdueCount++;
+      if (status === "paid") paidCount++;
+    });
+
+    return {
+      total: visible.length,
+      totalCollected,
+      totalOutstanding,
+      overdueCount,
+      paidCount,
+    };
+  }, [invoices]);
+
+  // ── Filter + sort engine ──────────────────────────────────────────────────
+
   const filteredInvoices = useMemo(() => {
-    let data = [...invoices];
+    let data = invoices.filter((inv) => !inv.isDeleted);
 
-    // 🔍 Search
     if (search) {
       data = data.filter(
         (inv) =>
           inv.invoiceNumber!.toLowerCase().includes(search.toLowerCase()) ||
-          inv.clientSnapshot.name
+          inv.customerSnapshot.name
             .toLowerCase()
             .includes(search.toLowerCase())
       );
     }
 
-    // 🎯 Status filter
     if (statusFilter !== "all") {
       data = data.filter(
-        (inv) => computeStatus(inv) === statusFilter
+        (inv) => computeInvoiceStatus(inv) === statusFilter
       );
     }
 
-    // 📅 Date filter
     if (dateFilter !== "all") {
       const now = new Date();
 
@@ -99,61 +231,57 @@ export default function InvoicesPage() {
       });
     }
 
-    // 💰 Sorting
-    if (sortAmount === "asc") {
-      data.sort((a, b) => a.total! - b.total!);
-    }
-
-    if (sortAmount === "desc") {
-      data.sort((a, b) => b.total! - a.total!);
-    }
+    if (sortAmount === "asc") data.sort((a, b) => a.total! - b.total!);
+    if (sortAmount === "desc") data.sort((a, b) => b.total! - a.total!);
 
     return data;
   }, [invoices, search, statusFilter, sortAmount, dateFilter]);
 
-  // 🔹 Delete
-  const onDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this invoice?")) {
-      deleteMutation.mutate(id);
-    }
+  const isFiltered =
+    !!search ||
+    statusFilter !== "all" ||
+    dateFilter !== "all" ||
+    sortAmount !== "none";
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
+
+  const onDelete = (id: string) => setDeleteTarget(id);
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget, {
+      onSuccess: () => setDeleteTarget(null),
+    });
   };
 
-  // 🔹 Open payment modal
+  // ── Payment modal ─────────────────────────────────────────────────────────
+
   const updateInvoice = (invoice: Invoice) => {
     setUpdatedInvoice(invoice);
     setIsPaying(true);
   };
 
-  // 🔹 Handle payment input
   const handleChange = (value: string) => {
-    setPaymentDetails((prev) => ({
-      ...prev,
-      amount: Number(value),
-    }));
+    setPaymentDetails((prev) => ({ ...prev, amount: Number(value) }));
   };
 
-  // 🔥 Save payment
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!updatedInvoice) return;
 
     const newPayments = [...(updatedInvoice.payments || []), paymentDetails];
 
-    updateMutation.mutate({
-      id: updatedInvoice._id!,
-      data: { payments: newPayments }
-    }, {
-      onSuccess: () => {
-        setPaymentDetails({
-          amount: 0,
-          date: new Date().toISOString(),
-        });
-        setIsPaying(false);
-        setUpdatedInvoice(null);
+    updateMutation.mutate(
+      { id: updatedInvoice._id!, data: { payments: newPayments } },
+      {
+        onSuccess: () => {
+          setPaymentDetails({ amount: 0, date: new Date().toISOString() });
+          setIsPaying(false);
+          setUpdatedInvoice(null);
+        },
       }
-    });
+    );
   };
 
-  // 🔥 RESET FILTERS
   const resetFilters = () => {
     setSearch("");
     setStatusFilter("all");
@@ -162,98 +290,226 @@ export default function InvoicesPage() {
   };
 
   const downloadInvoice = (invoice: Invoice) => {
-    // Implement PDF generation and downloading logic here
-    alert(`Downloading invoice #${invoice.invoiceNumber}`);
-    const res = apiFetch(`/invoices/${invoice._id}/download`,{
-      method: "GET",
-      headers: {
-        "Content-Type": "application/pdf",
-      },
-    });
+    if (!invoice._id) return;
+    downloadMutation.mutate(invoice._id);
   };
 
-  return (
-    <div className="p-6 space-y-6">
-      {/* HEADER */}
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Invoices</h1>
-          <p className="text-gray-500">Manage your invoices here.</p>
-        </div>
+  const activeStatusLabel =
+    STATUS_OPTIONS.find((s) => s.value === statusFilter)?.label ??
+    "All status";
+  const activeDateLabel =
+    DATE_OPTIONS.find((s) => s.value === dateFilter)?.label ?? "All dates";
+  const activeSortLabel =
+    SORT_OPTIONS.find((s) => s.value === sortAmount)?.label ??
+    "Default order";
 
+  return (
+    <div className="flex flex-col gap-6 p-6 max-w-screen-xl mx-auto">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="size-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+            <FileText size={18} className="text-primary" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-foreground leading-none">
+              Invoices
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {stats.total
+                ? `${stats.total} total invoice${stats.total !== 1 ? "s" : ""}`
+                : "Manage your invoices"}
+            </p>
+          </div>
+        </div>
         <Button
-          variant="outline"
+          size="sm"
+          className="gap-1.5 shrink-0"
           onClick={() => router.push("/invoices/create")}
-          className="bg-blue-700 text-white w-full md:w-auto hover:bg-blue-800"
         >
-          <FileText className="mr-2" />
-          Create Invoice
+          <Plus size={15} />
+          Create invoice
         </Button>
       </div>
 
-      {/* 🔥 FILTER BAR */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow flex flex-wrap gap-4 items-center">
-        {/* Search */}
-        <div className="flex items-center gap-2 border dark:border-gray-600 rounded-xl px-3 py-2 w-full sm:w-62.5 bg-gray-50 dark:bg-gray-900">
-          <Search size={16} className="text-gray-500 dark:text-gray-400" />
-          <input
-            placeholder="Search invoice..."
-            className="outline-none w-full bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard
+          label="Collected"
+          value={formatMoney(stats.totalCollected)}
+          icon={DollarSign}
+          iconClass="text-emerald-500"
+          bgClass="bg-emerald-500/10"
+          isLoading={isLoading}
+        />
+        <StatCard
+          label="Outstanding"
+          value={formatMoney(stats.totalOutstanding)}
+          icon={Clock}
+          iconClass="text-amber-500"
+          bgClass="bg-amber-500/10"
+          isLoading={isLoading}
+        />
+        <StatCard
+          label="Overdue"
+          value={stats.overdueCount}
+          icon={AlertTriangle}
+          iconClass="text-rose-500"
+          bgClass="bg-rose-500/10"
+          isLoading={isLoading}
+        />
+        <StatCard
+          label="Paid in full"
+          value={stats.paidCount}
+          icon={CheckCircle2}
+          iconClass="text-blue-500"
+          bgClass="bg-blue-500/10"
+          isLoading={isLoading}
+        />
+      </div>
+
+      {/* ── Filter bar ── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-0 max-w-xs">
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search invoices..."
+            className="pl-8 h-9 text-sm"
           />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X size={13} />
+            </button>
+          )}
         </div>
 
-        {/* Status */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="all">All Status</option>
-          <option value="paid">Paid</option>
-          <option value="partial">Partial</option>
-          <option value="overdue">Overdue</option>
-          <option value="draft">Draft</option>
-        </select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-9 gap-1.5 text-xs",
+                statusFilter !== "all" && "border-primary text-primary"
+              )}
+            >
+              {activeStatusLabel}
+              <ChevronDown size={12} className="opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            <DropdownMenuLabel className="text-xs">Status</DropdownMenuLabel>
+            {STATUS_OPTIONS.map((opt) => (
+              <DropdownMenuCheckboxItem
+                key={opt.value}
+                checked={statusFilter === opt.value}
+                onCheckedChange={() => setStatusFilter(opt.value)}
+                className="text-xs"
+              >
+                {opt.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        {/* Date */}
-        <select
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
-          className="border dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="all">All Dates</option>
-          <option value="thisMonth">This Month</option>
-          <option value="lastMonth">Last Month</option>
-        </select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-9 gap-1.5 text-xs",
+                dateFilter !== "all" && "border-primary text-primary"
+              )}
+            >
+              {activeDateLabel}
+              <ChevronDown size={12} className="opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            <DropdownMenuLabel className="text-xs">Due date</DropdownMenuLabel>
+            {DATE_OPTIONS.map((opt) => (
+              <DropdownMenuCheckboxItem
+                key={opt.value}
+                checked={dateFilter === opt.value}
+                onCheckedChange={() => setDateFilter(opt.value)}
+                className="text-xs"
+              >
+                {opt.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        {/* Sort */}
-        <select
-          value={sortAmount}
-          onChange={(e) =>
-            setSortAmount(e.target.value as "asc" | "desc" | "none")
-          }
-          className="border dark:border-gray-600 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="none">Sort Amount</option>
-          <option value="asc">Low → High</option>
-          <option value="desc">High → Low</option>
-        </select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-9 gap-1.5 text-xs",
+                sortAmount !== "none" && "border-primary text-primary"
+              )}
+            >
+              <SlidersHorizontal size={12} />
+              {activeSortLabel}
+              <ChevronDown size={12} className="opacity-60" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuLabel className="text-xs">Sort by</DropdownMenuLabel>
+            {SORT_OPTIONS.map((opt) => (
+              <DropdownMenuCheckboxItem
+                key={opt.value}
+                checked={sortAmount === opt.value}
+                onCheckedChange={() => setSortAmount(opt.value)}
+                className="text-xs"
+              >
+                {opt.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        {/* Reset */}
-        <Button variant="outline" onClick={resetFilters} className="dark:border-gray-600 dark:text-gray-300">
-          <SlidersHorizontal size={16} />
-          Reset
-        </Button>
+        {isFiltered && (
+          <button
+            onClick={resetFilters}
+            className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+          >
+            <X size={12} />
+            Clear
+          </button>
+        )}
       </div>
 
-      {/* TABLE */}
+      {/* ── Table ── */}
       {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-xl" />
-          ))}
+        <div className="rounded-xl border border-border overflow-hidden">
+          <div className="bg-muted/40 border-b border-border px-4 py-2.5">
+            <Skeleton className="h-3 w-24" />
+          </div>
+          <div className="divide-y divide-border">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="px-4 py-3 flex items-center gap-4">
+                <Skeleton className="h-3.5 w-20" />
+                <div className="flex items-center gap-2.5 flex-1">
+                  <Skeleton className="size-8 rounded-full" />
+                  <Skeleton className="h-3.5 w-32" />
+                </div>
+                <Skeleton className="h-3.5 w-16" />
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <InvoicesTable
@@ -264,39 +520,77 @@ export default function InvoicesPage() {
         />
       )}
 
-      {/* PAYMENT MODAL */}
-      {isPaying && (
-        <div className="fixed inset-0 z-50 backdrop-blur-sm bg-black/20 flex justify-center items-center">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl w-[90%] sm:w-100 space-y-4 border dark:border-gray-700 shadow-xl">
-            <h2 className="font-bold text-lg dark:text-white">Add Payment</h2>
+      {/* ── Payment dialog ── */}
+      <Dialog open={isPaying} onOpenChange={setIsPaying}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <DollarSign size={16} className="text-primary" />
+              Add payment
+            </DialogTitle>
+          </DialogHeader>
 
-            <input
+          <div className="flex flex-col gap-1.5 py-2">
+            <Label htmlFor="amount" className="text-xs">
+              Amount
+            </Label>
+            <Input
+              id="amount"
               type="number"
-              placeholder="Enter amount"
+              placeholder="0.00"
               autoFocus
+              className="h-9"
               onChange={(e) => handleChange(e.target.value)}
-              className="border dark:border-gray-600 rounded-xl p-2 w-full bg-white dark:bg-gray-900 dark:text-white"
+              disabled={updateMutation.isPending}
             />
-
-            <div className="flex justify-end gap-2">
-              <Button 
-                onClick={handleSubmit} 
-                disabled={updateMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {updateMutation.isPending ? "Saving..." : "Save"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setIsPaying(false)}
-                className="dark:border-gray-600 dark:text-gray-300"
-              >
-                Cancel
-              </Button>
-            </div>
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPaying(false)}
+              disabled={updateMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSubmit}
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? "Saving..." : "Save payment"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Delete confirmation ── */}
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(o) => !o && setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This invoice will be permanently removed. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmDelete}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

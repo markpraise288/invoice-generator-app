@@ -10,6 +10,7 @@ interface Props {
 export default function SubscriptionFields({ invoice, setInvoice }: Props) {
   const subscription = invoice.subscriptionDetails ?? {
     planName: "",
+    planPrice: 0,
     billingCycle: "monthly" as "monthly" | "yearly",
     startDate: "",
     endDate: "",
@@ -25,6 +26,7 @@ export default function SubscriptionFields({ invoice, setInvoice }: Props) {
       ...prev,
       subscriptionDetails: {
         planName: prev.subscriptionDetails?.planName ?? "",
+        planPrice: prev.subscriptionDetails?.planPrice ?? 0,
         billingCycle: prev.subscriptionDetails?.billingCycle ?? "monthly",
         startDate: prev.subscriptionDetails?.startDate ?? "",
         endDate: prev.subscriptionDetails?.endDate ?? "",
@@ -52,7 +54,7 @@ export default function SubscriptionFields({ invoice, setInvoice }: Props) {
           onChange={(e) =>
             updateSubscription("planName", e.target.value)
           }
-          className="w-full border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+          className="w-full border p-2 rounded-lg bg-white dark:bg-slate-900 dark:border-slate  -600"
         />
       </div>
 
@@ -89,7 +91,7 @@ export default function SubscriptionFields({ invoice, setInvoice }: Props) {
             onChange={(e) =>
               updateSubscription("startDate", e.target.value)
             }
-            className="w-full border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+            className="w-full border p-2 rounded-lg bg-white dark:bg-slate-900 dark:border-slate-600"
           />
         </div>
 
@@ -104,7 +106,7 @@ export default function SubscriptionFields({ invoice, setInvoice }: Props) {
             onChange={(e) =>
               updateSubscription("nextBillingDate", e.target.value)
             }
-            className="w-full border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+            className="w-full border p-2 rounded-lg bg-white dark:bg-slate-900 dark:border-slate-600"
           />
         </div>
       </div>
@@ -120,7 +122,22 @@ export default function SubscriptionFields({ invoice, setInvoice }: Props) {
           onChange={(e) =>
             updateSubscription("endDate", e.target.value)
           }
-          className="w-full border p-2 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600"
+          className="w-full border p-2 rounded-lg bg-white dark:bg-slate-900 dark:border-slate-600"
+        />
+      </div>
+
+      {/* PLAN PRICE */}
+      <div className="flex flex-col gap-1">
+        <label className="text-sm text-gray-500 dark:text-gray-400">
+          Plan Price
+        </label>
+        <input
+          type="number"
+          value={subscription.planPrice || ""}
+          onChange={(e) =>
+            updateSubscription("planPrice", parseFloat(e.target.value) || 0)
+          }
+          className="w-full border p-2 rounded-lg bg-white dark:bg-slate-900 dark:border-slate-600"
         />
       </div>
 

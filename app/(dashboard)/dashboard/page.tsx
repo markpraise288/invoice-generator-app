@@ -1,161 +1,186 @@
+// app/dashboard/page.tsx
+
 "use client";
-import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
-import Card from "@/components/ui/Card";
-import RecentActivities from "@/components/dashboardUI/RecentActivities";
-import QuickActions from "@/components/dashboardUI/QuickActions";
+
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import RevenueChart from "@/components/dashboardUI/RevenueChart";
-import OutstandingPayments from "@/components/dashboardUI/OutstandingPayments";
-import TopClients from "@/components/dashboardUI/TopClients";
-import Insights from "@/components/dashboardUI/Insights";
-import { useMemo } from "react";
-import { useInvoices } from "@/hooks/useInvoices";
-import { generateRevenueData } from "@/utils/generateRevenueData";
-import { calculateGrowth, getMonthlyStats } from "@/lib/growth";
-import { computeDashboardStats } from "@/lib/dashboard";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useOverviewReport } from "@/hooks/useReports";
+import type { ReportParams } from "@/hooks/useReports";
+import { formatDealValue } from "@/hooks/useDeals";
+import { useUpcomingTasks } from "@/hooks/useTasks";
 
-export default function Dashboard() {
-  const router = useRouter();
-  const { data: invoices = [], isLoading } = useInvoices();
+import { DashboardHeader, type DashboardRange } from "@/components/dashboardUI/DshboardHeader";
+import { MetricCard, MetricGrid } from "@/components/dashboardUI/MetricCard";
+import { PipelineChart } from "@/components/dashboardUI/PipelineChart";
+import { LeadsBySourceChart } from "@/components/dashboardUI/LeadsBySourceChart";
+import { RecentActivityFeed } from "@/components/dashboardUI/RecentActivityFeed";
 
-  const stats = useMemo(() => {
-    return computeDashboardStats(invoices);
-  }, [invoices]);
+import { UpcomingTasksWidget } from "@/components/tasks/UpcomingTasksWidget";
+import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
 
+import {
+  DollarSign,
+  Trophy,
+  CheckSquare,
+  TrendingUp,
+} from "lucide-react";
 
-    if (isLoading) {
-    return (
-      <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-32 w-full rounded-2xl" />
-          ))}
-        </div>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-          <Skeleton className="h-80 w-full rounded-2xl" />
-          <Skeleton className="h-80 w-full rounded-2xl" />
-        </div>
-      </div>
-    );
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
+interface DashboardPageProps {
+  currentUser?: { _id: string; name: string };
+}
+
+// ─── Date range resolver ───────────────────────────────────────────────────────
+
+const resolveDateRange = (range: DashboardRange): ReportParams => {
+  const now = new Date();
+  const from = new Date(now);
+
+  switch (range) {
+    case "today":
+      from.setHours(0, 0, 0, 0);
+      break;
+    case "week":
+      from.setDate(now.getDate() - now.getDay());
+      from.setHours(0, 0, 0, 0);
+      break;
+    case "month":
+      from.setDate(1);
+      from.setHours(0, 0, 0, 0);
+      break;
+    case "quarter":
+      const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+      from.setMonth(quarterStartMonth, 1);
+      from.setHours(0, 0, 0, 0);
+      break;
   }
 
-
-  const formatMoney = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD", // or USD
-    }).format(amount);
+  return {
+    from: from.toISOString(),
+    to: now.toISOString(),
   };
+};
 
+// ─── Main Page ─────────────────────────────────────────────────────────────────
 
-  const revenueData = generateRevenueData(invoices);
+export default function DashboardPage({ currentUser }: DashboardPageProps) {
+  const router = useRouter();
+  const [range, setRange] = useState<DashboardRange>("month");
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
 
-  const monthly = getMonthlyStats(invoices);
+  const params = useMemo(() => resolveDateRange(range), [range]);
 
-  const revenueGrowth = calculateGrowth(
-    monthly.currentRevenue,
-    monthly.lastRevenue,
+  const { data: overview, isLoading: overviewLoading } = useOverviewReport(
+    params,
+    { staleTime: 1000 * 60 }
   );
 
-  const invoiceGrowth = calculateGrowth(
-    monthly.currentInvoices,
-    monthly.lastInvoices,
-  );
+  // Pull a small overdue count for the tasks metric trend context
+  const { data: upcomingTasks } = useUpcomingTasks({
+    limit: 50,
+    daysAhead: 1,
+  });
 
-  const formatGrowth = (value: number) => {
-    const sign = value >= 0 ? "+" : "";
-    return `${sign}${value.toFixed(1)}%`;
-  };
-
-  const pendingGrowth = calculateGrowth(
-  stats.pendingInvoices,
-  monthly.lastInvoices // or last pending if you track it
-  );
+  const tasksDueToday = upcomingTasks?.filter((t) => {
+    const due = new Date(t.dueDate);
+    const today = new Date();
+    return (
+      due.getDate() === today.getDate() &&
+      due.getMonth() === today.getMonth() &&
+      due.getFullYear() === today.getFullYear() &&
+      !t.completed
+    );
+  }).length ?? 0;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="font-bold text-2xl md:text-3xl">Dashboard</h1>
-          <p className="text-gray-500 text-sm md:text-base">
-            Welcome, manage your Clients and Invoices
-          </p>
+    <div className="flex flex-col gap-6 p-6 max-w-screen-xl mx-auto">
+      {/* ── Header ── */}
+      <DashboardHeader
+        userName={currentUser?.name}
+        range={range}
+        onRangeChange={setRange}
+        onCreateLead={() => router.push("/leads?create=true")}
+      />
+
+      {/* ── Metrics row ── */}
+      <MetricGrid>
+        <MetricCard
+          label="Pipeline value"
+          value={formatDealValue(overview?.deals.openValue ?? 0)}
+          sub={`${overview?.deals.totalDeals ?? 0} open deals`}
+          icon={DollarSign}
+          iconClass="text-blue-500"
+          bgClass="bg-blue-500/10"
+          isLoading={overviewLoading}
+          onClick={() => router.push("/deals")}
+        />
+        <MetricCard
+          label="Won revenue"
+          value={formatDealValue(overview?.deals.wonValue ?? 0)}
+          trend={
+            overview
+              ? {
+                  value: overview.deals.winRate,
+                  direction: overview.deals.winRate >= 50 ? "up" : "down",
+                  label: "win rate",
+                }
+              : undefined
+          }
+          icon={Trophy}
+          iconClass="text-emerald-500"
+          bgClass="bg-emerald-500/10"
+          isLoading={overviewLoading}
+          onClick={() => router.push("/deals?stage=closed")}
+        />
+        <MetricCard
+          label="Tasks due today"
+          value={tasksDueToday}
+          sub={`${overview?.tasks.overdue ?? 0} overdue`}
+          icon={CheckSquare}
+          iconClass="text-amber-500"
+          bgClass="bg-amber-500/10"
+          isLoading={overviewLoading}
+          onClick={() => router.push("/tasks")}
+        />
+        <MetricCard
+          label="Lead conversion"
+          value={`${overview?.leads.conversionRate ?? 0}%`}
+          sub={`${overview?.leads.converted ?? 0} of ${overview?.leads.total ?? 0} leads`}
+          icon={TrendingUp}
+          iconClass="text-violet-500"
+          bgClass="bg-violet-500/10"
+          isLoading={overviewLoading}
+          onClick={() => router.push("/leads")}
+        />
+      </MetricGrid>
+
+      {/* ── Row 2: Pipeline + Upcoming tasks ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <PipelineChart />
         </div>
-
-        <Button
-          variant="outline"
-          onClick={() => router.push("/invoices/create")}
-          className="bg-blue-700 text-white w-full md:w-auto"
-        >
-          <FileText className="mr-2" />
-          New Invoice
-        </Button>
+        <div>
+          <UpcomingTasksWidget currentUserId={currentUser?._id} />
+        </div>
       </div>
 
-      {/* CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <Card
-          title="Total Invoices"
-          icon="file"
-          iconColor="text-blue-700"
-          value={stats.totalInvoices.toString()}
-          variant={invoiceGrowth >= 0 ? "rising" : "dropping"}
-          time={`${formatGrowth(invoiceGrowth)} this month`}
-        />
-
-        <Card
-          title="Paid Invoices"
-          icon="success"
-          iconColor="text-green-400"
-          value={stats.paidInvoices.toString()}
-          variant="rising"
-          time="Completed"
-        />
-
-        <Card
-          title="Pending Invoices"
-          icon="time"
-          iconColor="text-yellow-400"
-          value={stats.pendingInvoices.toString()}
-          variant={pendingGrowth <= 0 ? "rising" : "dropping"}
-          time={`${formatGrowth(pendingGrowth)} unpaid trend`}
-        />
-
-        <Card
-          title="Total Revenue"
-          icon="dollar"
-          iconColor="text-blue-700"
-          value={formatMoney(stats.totalRevenue)}
-          variant={revenueGrowth >= 0 ? "rising" : "dropping"}
-          time={`${formatGrowth(revenueGrowth)} vs last month`}
-        />
+      {/* ── Row 3: Activity feed + Leads by source ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <RecentActivityFeed limit={5}/>
+        </div>
+        <div>
+          <LeadsBySourceChart params={params} />
+        </div>
       </div>
 
-      {/* CHART + PAYMENTS */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
-        <RevenueChart data={revenueData} />
-        <OutstandingPayments invoices={invoices} />
-      </div>
-
-      {/* INSIGHTS */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
-        <TopClients invoices={invoices} />
-        <Insights invoices={invoices} />
-      </div>
-
-            {/* ACTIONS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <RecentActivities />
-        <QuickActions />
-      </div>
-
+      {/* ── Quick create task dialog ── */}
+      <CreateTaskDialog
+        open={createTaskOpen}
+        onOpenChange={setCreateTaskOpen}
+        assignedTo={currentUser?._id ?? ""}
+      />
     </div>
   );
 }
