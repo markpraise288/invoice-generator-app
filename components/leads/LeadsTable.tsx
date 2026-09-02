@@ -191,7 +191,7 @@ export function LeadsTable({
                   <CreateTaskDialog
                     open={createOpen}
                     onOpenChange={setCreateOpen}
-                    currentUserId={lead.owner?._id}
+                    currentUserId={lead.owner?._id ?? ''}
                     relatedId={lead._id}
                     relatedTo="Lead"
                   />

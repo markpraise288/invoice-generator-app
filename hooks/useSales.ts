@@ -77,7 +77,7 @@ export interface CreateSalePayload {
 
 export type UpdateSalePayload = Partial<Omit<CreateSalePayload, "status">>;
 
-const buildQueryString = (params: Record<string, unknown>) => {
+const buildQueryString = <T extends object>(params: T) => {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== "") search.append(key, String(value));

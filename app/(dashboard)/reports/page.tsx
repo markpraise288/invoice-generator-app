@@ -483,7 +483,13 @@ function DealsTab({ params }: { params: ReportParams }) {
               labelStyle={tooltipLabelStyle}
               itemStyle={tooltipItemStyle}
               cursor={{ fill: "hsl(var(--muted))", opacity: 0.4 }}
-              formatter={(v: number) => [formatDealValue(v), "Revenue"]}
+              formatter={(value) => {
+                const numericValue = Array.isArray(value)
+                  ? Number(value[0] ?? 0)
+                  : Number(value ?? 0);
+
+                return [formatDealValue(numericValue), "Revenue"];
+              }}
             />
             <Bar
               dataKey="revenue"
@@ -745,14 +751,14 @@ function LeadsTab({ params }: { params: ReportParams }) {
           isLoading={isLoading}
         >
           <div className="flex flex-col gap-2">
-            {(data?.stageBreakdown ?? []).map((item, i) => (
-              <div key={item.stage} className="flex items-center gap-3">
+            {(data?.statusBreakdown ?? []).map((item, i) => (
+              <div key={item.status} className="flex items-center gap-3">
                 <span
                   className="size-2 rounded-full shrink-0"
                   style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
                 />
                 <span className="text-xs text-foreground capitalize flex-1 truncate">
-                  {item.stage.replace("_", " ")}
+                  {item.status.replace("_", " ")}
                 </span>
                 <span className="text-xs font-medium text-foreground w-8 text-right">
                   {item.count}
@@ -1071,7 +1077,7 @@ function ActivityTab({ params }: { params: ReportParams }) {
 
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 
-export default function ReportsPage({ currentUser }: ReportsPageProps) {
+export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<ReportTab>("overview");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");

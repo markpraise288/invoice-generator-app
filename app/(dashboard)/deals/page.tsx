@@ -229,16 +229,9 @@ function DealListRow({
           {deal.title}
         </p>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-          {deal.company && (
             <span className="text-xs text-muted-foreground truncate max-w-[120px]">
-              {deal.company.name}
+              {deal.relatedId?.name}
             </span>
-          )}
-          {deal.contact && (
-            <span className="text-xs text-muted-foreground truncate max-w-[120px]">
-              {deal.company ? `· ${deal.contact.name}` : deal.contact.name}
-            </span>
-          )}
         </div>
       </div>
 
@@ -820,7 +813,7 @@ export default function DealsPage({ currentUser }: DealsPageProps) {
                     <CreateTaskDialog
                       open={openTaskDialog}
                       onOpenChange={setOpenTaskDialog}
-                      currentUserId={profile?._id}
+                      currentUserId={profile?._id ?? ''}
                       relatedId={deal._id}
                       relatedTo="Deal"
                     />

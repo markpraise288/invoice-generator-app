@@ -49,7 +49,14 @@ const relatedToDisplay: Record<ProjectRelatedTo, { icon: React.ElementType; labe
 
 function getRelatedId(project: { relatedId: any }): string | null {
   if (!project.relatedId) return null;
-  return typeof project.relatedId === "string" ? project.relatedId._id : project.relatedId;
+
+  if (typeof project.relatedId === "string") {
+    return project.relatedId;
+  }
+
+  return typeof project.relatedId === "object" && "_id" in project.relatedId
+    ? (project.relatedId._id ?? null)
+    : null;
 }
 
 function getRelatedLabel(project: { relatedId: any }): string | null {

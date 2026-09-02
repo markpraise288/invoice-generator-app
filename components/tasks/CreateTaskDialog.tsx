@@ -305,7 +305,7 @@ interface CreateTaskDialogProps {
 
 // ─── Default State ─────────────────────────────────────────────────────────────
 
-const getDefaultState = (currentUserId: string) => {
+const getDefaultState = (currentUserId: string | null) => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(9, 0, 0, 0);
@@ -317,7 +317,7 @@ const getDefaultState = (currentUserId: string) => {
     description: "",
     dueDate: defaultDue,
     priority: "medium" as TaskPriority,
-    assignedTo: currentUserId,
+    assignedTo: currentUserId ?? "",
   };
 };
 
@@ -574,7 +574,7 @@ export function CreateTaskDialog({
             </Label>
             <AssigneeCombobox
               value={form.assignedTo}
-              currentUserId={currentUserId}
+              currentUserId={currentUserId ?? ""}
               onChange={handleAssigneeChange}
               disabled={isPending}
             />

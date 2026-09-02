@@ -51,7 +51,7 @@ export interface Deal {
   stage: DealStage;
   probability: number;
   closeDate: string;
-  relatedId?: string | DealRelatedRecord | null; // not required — a Deal can specify relatedTo without relatedId set yet
+  relatedId?: DealRelatedRecord; // not required — a Deal can specify relatedTo without relatedId set yet
   relatedTo: DealRelatedTo;
   owner: DealUser;
   createdBy: DealUser;

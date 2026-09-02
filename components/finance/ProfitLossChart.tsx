@@ -103,7 +103,11 @@ export function ProfitLossChart({ dateRange }: ProfitLossChartProps) {
               borderRadius: "8px",
               fontSize: "12px",
             }}
-            formatter={(value: number) => `$${value.toLocaleString()}`}
+            formatter={(value: number | string | readonly (number | string)[] | undefined) => {
+              const numericValue = Array.isArray(value) ? value[0] : value;
+              const amount = typeof numericValue === "number" ? numericValue : Number(numericValue ?? 0);
+              return `$${amount.toLocaleString()}`;
+            }}
           />
           <Legend wrapperStyle={{ fontSize: "12px" }} />
           <Bar dataKey="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />

@@ -147,8 +147,7 @@ function DayCell({
             key={event._id}
             event={event}
             variant="compact"
-            onClick={(e) => {
-              if (e) e.stopPropagation();
+            onClick={() => {
               onEventClick(event);
             }}
           />

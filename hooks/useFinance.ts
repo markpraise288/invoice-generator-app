@@ -83,9 +83,9 @@ export interface ReportDateRange {
   groupBy?: "day" | "week" | "month";
 }
 
-const buildQueryString = (params: Record<string, unknown>) => {
+const buildQueryString = <T extends object>(params: T) => {
   const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params as Record<string, unknown>).forEach(([key, value]) => {
     if (value !== undefined && value !== "") search.append(key, String(value));
   });
   const qs = search.toString();

@@ -54,6 +54,7 @@ import {
   ClipboardList,
   ExternalLink,
   MapPin,
+  type LucideIcon,
 } from "lucide-react";
 
 // ─── Props ─────────────────────────────────────────────────────────────────────
@@ -73,7 +74,7 @@ interface ContactDetailsDrawerProps {
 // Mirrors relatedToConfig in CreateContactDialog — Contact's relatedTo is
 // narrower than Task's (only Company/Customer/Lead, per contact.model.js).
 
-const relatedToDisplay: Record<RelatedTo, { icon: React.ElementType; label: string }> = {
+const relatedToDisplay: Record<RelatedTo, { icon: LucideIcon; label: string }> = {
   Company: { icon: Building2, label: "Company" },
   Customer: { icon: Users, label: "Customer" },
   Lead: { icon: Target, label: "Lead" },
@@ -350,6 +351,7 @@ export function ContactDetailsDrawer({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const { data: contact, isLoading } = useContact(contactId ?? "", {
+    queryKey: ["contacts", "detail", contactId ?? ""] as const,
     enabled: !!contactId && open,
   });
 

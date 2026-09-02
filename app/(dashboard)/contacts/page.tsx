@@ -37,7 +37,7 @@ export default function ContactsPage() {
 
   const { data, isLoading } = useContacts(activeFilters);
 
-  const contacts = data ?? [];
+  const contacts = data?.contacts ?? [];
   const pagination = data?.pagination;
   const isFiltered = !!(search || filters.stage);
 

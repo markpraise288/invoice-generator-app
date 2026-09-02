@@ -95,7 +95,7 @@ const PRIORITY_ORDER: Record<TaskPriority, number> = {
 // of this component just asks "give me the id" / "give me the label".
 
 function getRelatedId(task: Task): string {
-  return typeof task.relatedId === "string" ? task.relatedId : task.relatedId;
+  return typeof task.relatedId === "string" ? task.relatedId : task.relatedId._id;
 }
 
 function getRelatedLabel(task: Task): string {

@@ -144,7 +144,7 @@ export default function TasksPage({ currentUser }: TasksPageProps) {
       <CreateTaskDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        currentUserId={currentUser?._id}
+        currentUserId={currentUser?._id ?? ''}
         onSuccess={() => refetch()}
       />
     </div>

@@ -12,7 +12,7 @@ import {
   X
 } from "lucide-react";
 import { Expense, ExpenseCategory } from "@/types/finance";
-import { useDeleteExpense } from "@/hooks/useFinance";
+import { useDeleteExpense } from "@/hooks/useExpenses";
 
 interface ExpenseTableProps {
   expenses: Expense[];

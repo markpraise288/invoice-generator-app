@@ -113,7 +113,10 @@ export function CashFlowChart({ dateRange }: CashFlowChartProps) {
               borderRadius: "8px",
               fontSize: "12px",
             }}
-            formatter={(value: number) => `$${value.toLocaleString()}`}
+            formatter={(value) => {
+              const numericValue = Array.isArray(value) ? Number(value[0] ?? 0) : Number(value ?? 0);
+              return `$${numericValue.toLocaleString()}`;
+            }}
           />
           <Legend wrapperStyle={{ fontSize: "12px" }} />
           <Area

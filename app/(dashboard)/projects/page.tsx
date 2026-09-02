@@ -265,7 +265,7 @@ export default function ProjectsPage() {
       </div>
 
       {viewMode === "kanban" ? (
-        <ProjectKanban onCardClick={openDrawer} onCardEdit={openEdit} />
+        <ProjectKanban onCardClick={openDrawer} />
       ) : isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (

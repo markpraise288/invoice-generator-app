@@ -73,7 +73,10 @@ export default function DashboardPage({ currentUser }: DashboardPageProps) {
 
   const { data: overview, isLoading: overviewLoading } = useOverviewReport(
     params,
-    { staleTime: 1000 * 60 }
+    {
+      queryKey: ["overview-report", params],
+      staleTime: 1000 * 60,
+    }
   );
 
   // Pull a small overdue count for the tasks metric trend context
@@ -161,7 +164,7 @@ export default function DashboardPage({ currentUser }: DashboardPageProps) {
           <PipelineChart />
         </div>
         <div>
-          <UpcomingTasksWidget currentUserId={currentUser?._id} />
+          <UpcomingTasksWidget currentUserId={currentUser?._id ?? ""} />
         </div>
       </div>
 
@@ -179,7 +182,7 @@ export default function DashboardPage({ currentUser }: DashboardPageProps) {
       <CreateTaskDialog
         open={createTaskOpen}
         onOpenChange={setCreateTaskOpen}
-        assignedTo={currentUser?._id ?? ""}
+        currentUserId={currentUser?._id ?? null}
       />
     </div>
   );

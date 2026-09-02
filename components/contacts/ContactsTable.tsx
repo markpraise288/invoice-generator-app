@@ -647,7 +647,7 @@ export function ContactsTable({
                 <CreateTaskDialog
                   open={createOpen}
                   onOpenChange={setCreateOpen}
-                  currentUserId={profile?._id}
+                  currentUserId={profile?._id ?? ''}
                   relatedId={contact._id}
                   relatedTo="Contact"
                 />

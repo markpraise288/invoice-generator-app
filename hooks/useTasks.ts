@@ -37,7 +37,7 @@ export interface Task {
   title: string;
   description?: string;
   relatedTo: RelatedToType;
-  relatedId: string | TaskRelatedRecord; // string when unpopulated, object when populated
+  relatedId: TaskRelatedRecord; // string when unpopulated, object when populated
   assignedTo: TaskUser;
   createdBy: TaskUser;
   dueDate: string;

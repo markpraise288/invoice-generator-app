@@ -12,7 +12,7 @@ import {
   X
 } from "lucide-react";
 import { Sale } from "@/types/finance";
-import { useDeleteSale } from "@/hooks/useFinance";
+import { useDeleteSale } from "@/hooks/useSales";
 
 interface SalesTableProps {
   sales: Sale[];

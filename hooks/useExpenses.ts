@@ -79,7 +79,7 @@ export interface CreateExpensePayload {
 
 export type UpdateExpensePayload = Partial<CreateExpensePayload>;
 
-const buildQueryString = (params: Record<string, unknown>) => {
+const buildQueryString = (params: object) => {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== "") search.append(key, String(value));

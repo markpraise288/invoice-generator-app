@@ -49,6 +49,7 @@ import {
   XCircle,
   MoreHorizontal,
   Loader2,
+  type LucideIcon,
 } from "lucide-react";
 
 // ─── Related entity display config (icon + label per type) ────────────────────
@@ -417,7 +418,7 @@ export function DealDetailsDrawer({
   const relatedLabel = getRelatedLabel(deal);
   const relatedSubtitle = getRelatedSubtitle(deal);
   const relatedDisplay = relatedToDisplay[deal.relatedTo];
-  const RelatedIcon = relatedDisplay?.icon ?? Building2;
+  const RelatedIcon = (relatedDisplay?.icon as React.ComponentType<{ size?: number; className?: string }>) ?? Building2;
 
   // ── Field save ─────────────────────────────────────────────────────────────
 

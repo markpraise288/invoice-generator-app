@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { useCreateExpense, useUpdateExpense } from "@/hooks/useExpenses";
 import { Expense, ExpenseCategory } from "@/types/finance";
-import { useCreateExpense, useUpdateExpense } from "@/hooks/useFinance";
 
 interface ExpenseFormProps {
   isOpen: boolean;
@@ -31,24 +31,24 @@ const initialFormData = {
   notes: "",
 };
 
+const getFormData = (expense?: Expense | null) => {
+  if (!expense) {
+    return initialFormData;
+  }
+
+  return {
+    title: expense.title,
+    amount: expense.amount.toString(),
+    category: expense.category,
+    date: expense.date.split("T")[0],
+    notes: expense.notes || "",
+  };
+};
+
 export default function ExpenseForm({ isOpen, onClose, expense }: ExpenseFormProps) {
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState(() => getFormData(expense));
   const createExpense = useCreateExpense();
   const updateExpense = useUpdateExpense();
-
-  useEffect(() => {
-    if (expense) {
-      setFormData({
-        title: expense.title,
-        amount: expense.amount.toString(),
-        category: expense.category,
-        date: expense.date.split("T")[0],
-        notes: expense.notes || "",
-      });
-    } else {
-      setFormData(initialFormData);
-    }
-  }, [expense, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,21 +58,22 @@ export default function ExpenseForm({ isOpen, onClose, expense }: ExpenseFormPro
       amount: parseFloat(formData.amount),
       category: formData.category,
       date: new Date(formData.date).toISOString(),
+      description: formData.notes,
       notes: formData.notes,
     };
 
     if (expense) {
       // Note: Assuming 'updateExpense' accepts this structure
       updateExpense.mutate({ _id: expense._id, ...expenseData } as any, {
-      onSuccess: () => {
-           onClose();
-           setFormData(initialFormData);
-      },
-       });
+        onSuccess: () => {
+          onClose();
+          setFormData(initialFormData);
+        },
+      });
       return;
     }
 
-    createExpense.mutate(expenseData, {
+    createExpense.mutate(expenseData as Parameters<typeof createExpense.mutate>[0], {
       onSuccess: () => {
         onClose();
         setFormData(initialFormData);

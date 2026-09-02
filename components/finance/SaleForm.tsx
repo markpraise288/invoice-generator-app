@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Sale } from "@/types/finance";
-import { useCreateSale, useUpdateSale } from "@/hooks/useFinance";
+import { useCreateSale, useUpdateSale } from "@/hooks/useSales";
 
 interface SaleFormProps {
   isOpen: boolean;
@@ -12,32 +12,34 @@ interface SaleFormProps {
   sale?: Sale | null;
 }
 
-const initialFormData = {
-  source: "",
-  client: "",
-  amount: "",
-  status: "paid" as "paid" | "pending" | "cancelled",
-  date: new Date().toISOString().split("T")[0],
+const getInitialFormData = (sale?: Sale | null) => {
+  if (sale) {
+    return {
+      source: sale.source,
+      client: sale.client,
+      amount: sale.amount.toString(),
+      status: sale.status as "paid" | "pending" | "cancelled",
+      date: sale.date.split("T")[0],
+    };
+  }
+
+  return {
+    source: "",
+    client: "",
+    amount: "",
+    status: "paid" as "paid" | "pending" | "cancelled",
+    date: new Date().toISOString().split("T")[0],
+  };
 };
 
 export default function SaleForm({ isOpen, onClose, sale }: SaleFormProps) {
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState(() => getInitialFormData(sale));
   const createSale = useCreateSale();
   const updateSale = useUpdateSale();
 
-  useEffect(() => {
-    if (sale) {
-      setFormData({
-        source: sale.source,
-        client: sale.client,
-        amount: sale.amount.toString(),
-        status: sale.status as "paid" | "pending" | "cancelled",
-        date: sale.date.split("T")[0],
-      });
-    } else {
-      setFormData(initialFormData);
-    }
-  }, [sale, isOpen]);
+  const resetForm = (nextSale?: Sale | null) => {
+    setFormData(getInitialFormData(nextSale));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +57,7 @@ export default function SaleForm({ isOpen, onClose, sale }: SaleFormProps) {
       updateSale.mutate({ _id: sale._id, ...saleData } as any, {
         onSuccess: () => {
           onClose();
-          setFormData(initialFormData);
+          resetForm();
         },
       });
       return;
@@ -65,7 +67,7 @@ export default function SaleForm({ isOpen, onClose, sale }: SaleFormProps) {
     createSale.mutate(saleData as any, {
       onSuccess: () => {
         onClose();
-        setFormData(initialFormData);
+        resetForm();
       },
     });
   };

@@ -119,24 +119,24 @@ function AttendeeAvatars({
 function CrmLinks({ event }: { event: CalendarEvent }) {
   const links = [];
 
-  if (event.lead) {
+  if (event.relatedTo === "Lead") {
     links.push({
       icon: AlertCircle,
-      label: event.lead.name,
+      label: event.relatedId?.name,
       className: "text-blue-500",
     });
   }
-  if (event.contact) {
+  if (event.relatedTo === "Contact") {
     links.push({
       icon: User,
-      label: event.contact.name,
+      label: event.relatedId?.name,
       className: "text-violet-500",
     });
   }
-  if (event.deal) {
+  if (event.relatedTo === "Deal") {
     links.push({
       icon: DollarSign,
-      label: event.deal.name,
+      label: event.relatedId?.name,
       className: "text-emerald-500",
     });
   }

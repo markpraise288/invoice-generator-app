@@ -22,18 +22,13 @@ type LeadSource =
 
 const initialForm = {
   name: "",
-
   email: "",
-
   phone: "",
-
   company: "",
-
   position: "",
-
   source: "manual" as LeadSource,
-
   value: 0,
+  stage: "new"
 };
 
 export default function CreateLeadDialog({ open, onClose }: Props) {
@@ -72,7 +67,8 @@ export default function CreateLeadDialog({ open, onClose }: Props) {
       await createLead.mutateAsync({
         ...form,
 
-        status: "new",
+        source: form.source as Parameters<typeof createLead.mutateAsync>[0]["source"],
+        stage: "new",
       });
 
       resetForm();

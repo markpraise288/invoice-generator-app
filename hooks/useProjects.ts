@@ -27,7 +27,7 @@ export interface Project {
   _id: string;
   name: string;
   description?: string;
-  relatedId: string | ProjectRelatedRecord; // was: customer/company — now required, one polymorphic pair
+  relatedId: ProjectRelatedRecord; // was: customer/company — now required, one polymorphic pair
   relatedTo: ProjectRelatedTo;
   status: ProjectStatus;
   startDate?: string | null;
@@ -96,9 +96,9 @@ export interface ProjectTask {
 const getRelatedId = (project: Project): string =>
   typeof project.relatedId === "string" ? project.relatedId : project.relatedId._id;
 
-const buildQueryString = (params: Record<string, unknown>) => {
+const buildQueryString = (params: object) => {
   const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params as Record<string, unknown>).forEach(([key, value]) => {
     if (value !== undefined && value !== "") {
       search.append(key, String(value));
     }
@@ -111,8 +111,7 @@ export const projectKeys = {
   all: ["projects"] as const,
   lists: () => [...projectKeys.all, "list"] as const,
   list: (params: ProjectsListParams) => [...projectKeys.lists(), params] as const,
-  kanban: (filter: Record<string, unknown>) =>
-    [...projectKeys.all, "kanban", filter] as const,
+  kanban: (filter: object) => [...projectKeys.all, "kanban", filter] as const,
   details: () => [...projectKeys.all, "detail"] as const,
   detail: (id: string) => [...projectKeys.details(), id] as const,
   tasks: (id: string) => [...projectKeys.all, "tasks", id] as const,

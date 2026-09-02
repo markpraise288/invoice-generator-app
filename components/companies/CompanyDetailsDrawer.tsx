@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import {
+  companyKeys,
   useCompany,
   useCompanyStats,
   useDeleteCompany,
@@ -191,7 +192,9 @@ function ContactsTab({
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
   const [contactDrawerOpen, setContactDrawerOpen] = useState(false);
 
-  const { data: contacts, isLoading } = useContacts({relatedTo: "Company", relatedId: companyId});
+  const { data: contactsList, isLoading } = useContacts({relatedTo: "Company", relatedId: companyId});
+
+  const contacts = contactsList?.contacts
 
   return (
     <>
@@ -354,6 +357,7 @@ export function CompanyDetailsDrawer({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const { data: company, isLoading } = useCompany(companyId ?? "", {
+    queryKey: companyKeys.detail(companyId ?? ""),
     enabled: !!companyId && open,
   });
 

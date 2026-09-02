@@ -90,9 +90,9 @@ export interface AuditLogsListResponse {
   pagination: { total: number; page: number; limit: number; totalPages: number };
 }
 
-const buildQueryString = (params: Record<string, unknown>) => {
+const buildQueryString = (params: object = {}) => {
   const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params as Record<string, unknown>).forEach(([key, value]) => {
     if (value !== undefined && value !== "") search.append(key, String(value));
   });
   const qs = search.toString();

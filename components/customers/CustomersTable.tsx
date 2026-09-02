@@ -169,7 +169,7 @@ export function CustomersTable({
                   <CreateTaskDialog
                     open={createOpen}
                     onOpenChange={setCreateOpen}
-                    currentUserId={profile?._id}
+                    currentUserId={profile?._id ?? ''}
                     relatedId={customer._id}
                     relatedTo="Customer"
                   />

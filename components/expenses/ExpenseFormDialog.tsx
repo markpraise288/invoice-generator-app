@@ -41,6 +41,7 @@ const emptyForm: CreateExpensePayload = {
   description: "",
   category: "other",
   vendor: "",
+  amount: 0,
   currency: "USD",
   isRecurring: false,
   recurringInterval: null,
@@ -80,6 +81,7 @@ export function ExpenseFormDialog({ open, onOpenChange, expense }: ExpenseFormDi
         description: expense.description,
         category: expense.category,
         vendor: expense.vendor || "",
+        amount: expense.amount,
         currency: expense.currency,
         isRecurring: expense.isRecurring,
         recurringInterval: expense.recurringInterval || null,
@@ -231,7 +233,7 @@ export function ExpenseFormDialog({ open, onOpenChange, expense }: ExpenseFormDi
                 Recurring Expense
               </Label>
               <p className="text-xs text-muted-foreground">
-                Mark this as a recurring cost (doesn't auto-create future entries)
+                Mark this as a recurring cost (doesn&apos;t auto-create future entries)
               </p>
             </div>
             <Switch

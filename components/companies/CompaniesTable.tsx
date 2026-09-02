@@ -622,7 +622,7 @@ export function CompaniesTable({
               <CreateTaskDialog
                   open={createOpen}
                   onOpenChange={setCreateOpen}
-                  currentUserId={profile?._id}
+                  currentUserId={profile?._id ?? ''}
                   relatedId={company._id}
                   relatedTo="Company"
                 />
