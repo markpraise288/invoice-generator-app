@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { ArrowLeft, CheckCircle2, Loader2, Mail, Workflow } from "lucide-react";
 import { apiFetch } from "@/lib/apiFetch";
 
