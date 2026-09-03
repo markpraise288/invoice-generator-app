@@ -8,6 +8,7 @@ import type {
   Contact,
   ContactStage,
   ContactFilters,
+  ContactsResponse,
 } from "@/hooks/useContacts";
 import { ContactDetailsDrawer } from "./ContactDetailsDrawer";
 import { CreateContactDialog } from "./CreateContactDialog";

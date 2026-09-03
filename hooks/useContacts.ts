@@ -176,7 +176,7 @@ const fetchContacts = async (
 
   const query = params.toString() ? `?${params.toString()}` : "";
   const res = await apiFetch(`/contacts${query}`);
-  return res.data.contacts;
+  return res.data;
 };
 
 const fetchContact = async (contactId: string): Promise<Contact> => {
