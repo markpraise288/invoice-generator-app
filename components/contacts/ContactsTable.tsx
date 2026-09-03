@@ -461,6 +461,8 @@ export function ContactsTable({
 
   // ── Selection ──────────────────────────────────────────────────────────────
 
+  console.log(contacts);
+
   const toggleOne = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
