@@ -23,11 +23,11 @@ const RELATED_TO_HREF: Record<ActivityRelatedTo, (id: string) => string> = {
   Lead: () => `/leads`,
   Contact: () => `/contacts`,
   Company: () => `/companies`,
-  Deal: (id) => `/deals/${id}`,
-  Task: (id) => `/tasks/${id}`,
+  Deal: (id) => `/deals`,
+  Task: (id) => `/tasks`,
   Invoice: (id) => `/invoices/${id}`,
   Customer: (id) => `/customers/${id}`,
-  Project: (id) => `/projects/${id}`,
+  Project: (id) => `/projects`,
 };
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────

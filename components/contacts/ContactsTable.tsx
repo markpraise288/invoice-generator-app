@@ -50,6 +50,7 @@ import {
   SlidersHorizontal,
   ChevronDown,
   ListChecks,
+  Eye,
 } from "lucide-react";
 import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog"
 import { useProfile } from "@/hooks/useSettings";
@@ -368,6 +369,7 @@ function ContactRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem className="text-xs" onClick={onView}>
+              <Eye size={13} className="mr-2" />
               View details
             </DropdownMenuItem>
             <DropdownMenuItem className="text-xs" onClick={onEdit}>

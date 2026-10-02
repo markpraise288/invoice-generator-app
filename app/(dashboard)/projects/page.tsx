@@ -3,7 +3,21 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, LayoutGrid, List, Search, MoreHorizontal, Eye, Pencil, Trash2, Users, Building2, Contact as ContactIcon, Handshake } from "lucide-react";
+import {
+  Plus,
+  LayoutGrid,
+  List,
+  Search,
+  MoreHorizontal,
+  Eye,
+  Pencil,
+  Trash2,
+  Users,
+  Building2,
+  Contact as ContactIcon,
+  Handshake,
+  ListChecks,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,17 +50,27 @@ import { ProjectDetailsDrawer } from "@/components/projects/ProjectDetailsDrawer
 import { ProjectStatusBadge } from "@/components/projects/ProjectStatusBadge";
 import { ProjectProgressBar } from "@/components/projects/ProjectProgressBar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProjects, useDeleteProject, type Project, type ProjectRelatedTo } from "@/hooks/useProjects";
+import {
+  useProjects,
+  useDeleteProject,
+  type Project,
+  type ProjectRelatedTo,
+} from "@/hooks/useProjects";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useSettings";
 
 type ViewMode = "kanban" | "list";
 
 // ─── Related entity display config — same map used across every Project
 // component updated this conversation ───────────────────────────────────────
 
-const relatedToDisplay: Record<ProjectRelatedTo, { icon: React.ElementType; label: string }> = {
+const relatedToDisplay: Record<
+  ProjectRelatedTo,
+  { icon: React.ElementType; label: string }
+> = {
   Customer: { icon: Users, label: "Customer" },
   Company: { icon: Building2, label: "Company" },
   Contact: { icon: ContactIcon, label: "Contact" },
@@ -67,11 +91,13 @@ function ProjectListRow({
   onView,
   onEdit,
   onDeleteRequest,
+  setOpenTaskDialog,
 }: {
   project: Project;
   onView: (project: Project) => void;
   onEdit: (project: Project) => void;
   onDeleteRequest: (project: Project) => void;
+  setOpenTaskDialog: (open: boolean) => void;
 }) {
   const relatedLabel = getRelatedLabel(project);
   const relatedDisplay = relatedToDisplay[project.relatedTo];
@@ -116,6 +142,10 @@ function ProjectListRow({
               <Eye className="mr-2 h-3.5 w-3.5" />
               View details
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setOpenTaskDialog(true)}>
+              <ListChecks className="mr-2 h-3.5 w-3.5" />
+              Add Task
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onEdit(project)}>
               <Pencil className="mr-2 h-3.5 w-3.5" />
               Edit
@@ -145,12 +175,15 @@ export default function ProjectsPage() {
   const [drawerProjectId, setDrawerProjectId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [openTaskDialog, setOpenTaskDialog] = useState(false);
 
   const { data, isLoading } = useProjects({
     search: debouncedSearch,
     status: status === "all" ? undefined : (status as any),
     limit: 50,
   });
+
+  const { data: profile } = useProfile();
 
   const deleteProject = useDeleteProject();
 
@@ -221,7 +254,7 @@ export default function ProjectsPage() {
           </div>
           {viewMode === "list" && (
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-40">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -243,7 +276,7 @@ export default function ProjectsPage() {
               "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
               viewMode === "kanban"
                 ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             <LayoutGrid className="h-3.5 w-3.5" />
@@ -255,7 +288,7 @@ export default function ProjectsPage() {
               "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
               viewMode === "list"
                 ? "bg-muted text-foreground"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             <List className="h-3.5 w-3.5" />
@@ -274,7 +307,9 @@ export default function ProjectsPage() {
         </div>
       ) : !data?.projects.length ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
-          <p className="text-sm font-medium text-foreground">No projects found</p>
+          <p className="text-sm font-medium text-foreground">
+            No projects found
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
             Create your first project to start tracking delivery.
           </p>
@@ -282,13 +317,24 @@ export default function ProjectsPage() {
       ) : (
         <div className="rounded-xl border">
           {data.projects.map((project) => (
-            <ProjectListRow
-              key={project._id}
-              project={project}
-              onView={openDrawer}
-              onEdit={openEdit}
-              onDeleteRequest={setDeleteTarget}
-            />
+            <div key={project._id} className="border-b last:border-b-0">
+              <ProjectListRow
+                key={project._id}
+                project={project}
+                onView={openDrawer}
+                onEdit={openEdit}
+                onDeleteRequest={setDeleteTarget}
+                setOpenTaskDialog={setOpenTaskDialog}
+              />
+
+              <CreateTaskDialog
+                open={openTaskDialog}
+                onOpenChange={setOpenTaskDialog}
+                currentUserId={profile?._id ?? ""}
+                relatedId={project._id}
+                relatedTo="Project"
+              />
+            </div>
           ))}
         </div>
       )}
@@ -306,17 +352,24 @@ export default function ProjectsPage() {
         onEdit={handleEditFromDrawer}
       />
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this project?</AlertDialogTitle>
             <AlertDialogDescription>
-              <span className="font-medium text-foreground">{deleteTarget?.name}</span> will be
-              permanently deleted. This cannot be undone.
+              <span className="font-medium text-foreground">
+                {deleteTarget?.name}
+              </span>{" "}
+              will be permanently deleted. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteProject.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteProject.isPending}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               disabled={deleteProject.isPending}
               className="bg-red-600 hover:bg-red-700"

@@ -39,10 +39,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import {
   DollarSign,
   Plus,
+  Eye,
   Search,
   Kanban,
   List,
@@ -229,7 +230,7 @@ function DealListRow({
           {deal.title}
         </p>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            <span className="text-xs text-muted-foreground truncate max-w-[120px]">
+            <span className="text-xs text-muted-foreground truncate max-w-30">
               {deal.relatedId?.name}
             </span>
         </div>
@@ -297,6 +298,7 @@ function DealListRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem onClick={onClick} className="text-xs">
+              <Eye size={13} className="mr-2" />
               View details
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -753,7 +755,7 @@ export default function DealsPage({ currentUser }: DealsPageProps) {
                 <p className="text-sm font-medium text-foreground">
                   {isFiltered ? "No deals match your filters" : "No deals yet"}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+                <p className="text-xs text-muted-foreground mt-1 max-w-60">
                   {isFiltered
                     ? "Try adjusting your filters"
                     : "Create your first deal to start tracking your pipeline"}

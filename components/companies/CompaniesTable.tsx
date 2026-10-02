@@ -46,6 +46,7 @@ import {
   ChevronDown,
   DollarSign,
   ListChecks,
+  Eye,
 } from "lucide-react";
 import { useProfile } from "@/hooks/useSettings";
 import { CreateTaskDialog } from "@/components/tasks/CreateTaskDialog";
@@ -338,6 +339,7 @@ function CompanyRow({
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem className="text-xs" onClick={onView}>
+              <Eye size={13} className="mr-2" />
               View profile
             </DropdownMenuItem>
             <DropdownMenuItem className="text-xs" onClick={onEdit}>

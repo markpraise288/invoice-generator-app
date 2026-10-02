@@ -64,7 +64,7 @@ export function ExpensesFilters({ filters, onChange }: ExpensesFiltersProps) {
         value={filters.category || "all"}
         onValueChange={(v) => update({ category: v === "all" ? undefined : (v as ExpenseCategory) })}
       >
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-45">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -80,7 +80,7 @@ export function ExpensesFilters({ filters, onChange }: ExpensesFiltersProps) {
         value={filters.status || "all"}
         onValueChange={(v) => update({ status: v === "all" ? undefined : (v as any) })}
       >
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-37.5">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

@@ -1125,7 +1125,7 @@ export default function ReportsPage() {
                 key={tab.value}
                 value={tab.value}
                 className={cn(
-                  "gap-1.5 text-xs rounded-none border-b-2 border-transparent",
+                  "gap-1.5 text-xs rounded-none border-b-2 border-transparent pt-3",
                   "data-[state=active]:border-primary data-[state=active]:bg-transparent",
                   "data-[state=active]:text-foreground data-[state=active]:shadow-none",
                   "pb-3 px-3"

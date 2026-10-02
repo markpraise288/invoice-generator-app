@@ -59,6 +59,8 @@ export interface Invoice {
   _id?: string;
   invoiceNumber?: string;
 
+  customerId: string;
+
   status: InvoiceStatus;
 
   type: InvoiceType;

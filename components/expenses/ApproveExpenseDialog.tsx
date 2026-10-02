@@ -53,7 +53,7 @@ export function ApproveExpenseDialog({ expense, open, onOpenChange }: ApproveExp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[420px]">
+      <DialogContent className="sm:max-w-105">
         <DialogHeader>
           <DialogTitle>Reject Expense</DialogTitle>
           <DialogDescription>

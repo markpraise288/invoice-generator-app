@@ -39,7 +39,7 @@ function EmptyState() {
         <FileText size={20} className="text-muted-foreground" />
       </div>
       <p className="text-sm font-medium text-foreground">No invoices yet</p>
-      <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+      <p className="text-xs text-muted-foreground mt-1 max-w-60">
         Invoices you create will show up here
       </p>
     </div>

@@ -154,6 +154,7 @@ export default function CreateInvoicePage() {
     due.setDate(today.getDate() + 30);
 
     setInvoice({
+      customerId: '',
       type: "standard",
       template: "modern",
       status: "draft",
@@ -235,6 +236,7 @@ export default function CreateInvoicePage() {
               phone: selected.phone ?? "",
               address: `${selected.billingAddress?.street}, ${selected.billingAddress?.city}, ${selected.billingAddress?.state}, ${selected.billingAddress?.country},`,
             },
+            customerId: selected._id,
           }
         : prev
     );

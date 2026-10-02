@@ -137,7 +137,7 @@ export function ExpenseFormDialog({ open, onOpenChange, expense }: ExpenseFormDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-130 max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {isEditing ? "Edit Expense" : "New Expense"}
